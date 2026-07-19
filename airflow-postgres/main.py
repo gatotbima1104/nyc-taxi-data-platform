@@ -1,6 +1,7 @@
 from scripts.extract import Extract
 from scripts.database_connection import DatabaseConnection
-from scripts.layers import Loader
+from scripts.layers import ( Loader, QualityCheck )
+from scripts.configs import Config
 
 from utils.helpers import Helper
 from utils.constants import (
@@ -38,10 +39,22 @@ def extract():
     
     Helper.log(message="Extract successfully ...")
     
+def check_quality_file():
+    qc = QualityCheck(conn)
+    
+    for load in Config.LOAD_TO_BRONZE_CONFIGS:
+        if load["type"] == "parquet":
+            qc.validate_parquet(load["file"])
+        else:
+            qc.validate_csv(load["file"])
+        
+    Helper.log("Quality check passed ...")
+    
 def load_to_bronze():
     Loader(conn).load_to_bronze()
     Helper.log(message="Load successfully ...")
 
 if __name__ == "__main__":
     extract()
+    check_quality_file()
     load_to_bronze()
