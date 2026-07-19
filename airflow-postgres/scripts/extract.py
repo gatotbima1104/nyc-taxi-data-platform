@@ -38,6 +38,6 @@ class Extract:
     
     def extract(self, url: str, filename: str) -> Path:  
         """ Ingesting data from downloaded file """
-        print(f"[EXTRACT] {filename}")
+        print(f"[INFO] EXTRACT {filename}")
         output_path = (self.base_dir / ".." / "data" / "raw" / filename)
         return self.download_file(url, output_path)

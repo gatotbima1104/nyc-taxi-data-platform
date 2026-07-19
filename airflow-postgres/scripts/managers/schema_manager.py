@@ -29,6 +29,11 @@ class SchemaManager:
                 print(f'[SQL] Executed {filepath.name}')
         
         self.connection.commit()
+        
+    def fetch(self, sql: str):
+        with self.connection.cursor() as cur:
+            cur.execute(sql)
+            return cur.fetchone()[0]
 
     def count(self, table):
         """" Count Table Rows """

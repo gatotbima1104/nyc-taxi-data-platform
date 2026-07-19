@@ -30,7 +30,7 @@ class Helper:
                 f"Unsopported file format: {suffix}"
             )
             
-        print(f'[LOAD] Loading {suffix} data ...')
+        print(f'[INFO] Load {suffix} data ...')
         return Helper.LOADERS[suffix](filepath) # pd.read_csv(filepath)
         
     @staticmethod
@@ -60,55 +60,55 @@ class Helper:
         Helper.log(f"{step_name} completed in {duration:.2f}s")
         return result
     
-    @staticmethod
-    def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
-        """reporting dataset information"""
-        total_rows = len(valid_data) + len(invalid_data)
+    # @staticmethod
+    # def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
+    #     """reporting dataset information"""
+    #     total_rows = len(valid_data) + len(invalid_data)
 
-        valid_pct = (
-            len(valid_data) / total_rows * 100
-            if total_rows else 0
-        )
+    #     valid_pct = (
+    #         len(valid_data) / total_rows * 100
+    #         if total_rows else 0
+    #     )
 
-        invalid_pct = (
-            len(invalid_data) / total_rows * 100
-            if total_rows else 0
-        )
+    #     invalid_pct = (
+    #         len(invalid_data) / total_rows * 100
+    #         if total_rows else 0
+    #     )
     
-        time.sleep(1)
+    #     time.sleep(1)
         
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("DATA QUALITY REPORT", isShowTimestamp=False)
-        Helper.log("", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("DATA QUALITY REPORT", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
 
-        Helper.log("Dataset Summary", isShowTimestamp=False)
-        Helper.log("-" * 15, isShowTimestamp=False)
-        Helper.log(f"Total Records      : {total_rows:,}", isShowTimestamp=False)
-        Helper.log(f"Valid Records      : {len(valid_data):,} ({valid_pct:.2f}%)", isShowTimestamp=False)
-        Helper.log(f"Invalid Records    : {len(invalid_data):,} ({invalid_pct:.2f}%)", isShowTimestamp=False)
+    #     Helper.log("Dataset Summary", isShowTimestamp=False)
+    #     Helper.log("-" * 15, isShowTimestamp=False)
+    #     Helper.log(f"Total Records      : {total_rows:,}", isShowTimestamp=False)
+    #     Helper.log(f"Valid Records      : {len(valid_data):,} ({valid_pct:.2f}%)", isShowTimestamp=False)
+    #     Helper.log(f"Invalid Records    : {len(invalid_data):,} ({invalid_pct:.2f}%)", isShowTimestamp=False)
 
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("Invalid Record Breakdown", isShowTimestamp=False)
-        Helper.log("-" * 24, isShowTimestamp=False)
-        Helper.log(f"Duration Invalid   : {stats['invalid_duration']:,}", isShowTimestamp=False)
-        Helper.log(f"Distance Invalid   : {stats['invalid_distance']:,}", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("Invalid Record Breakdown", isShowTimestamp=False)
+    #     Helper.log("-" * 24, isShowTimestamp=False)
+    #     Helper.log(f"Duration Invalid   : {stats['invalid_duration']:,}", isShowTimestamp=False)
+    #     Helper.log(f"Distance Invalid   : {stats['invalid_distance']:,}", isShowTimestamp=False)
 
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("Pipeline", isShowTimestamp=False)
-        Helper.log("-" * 8, isShowTimestamp=False)
-        Helper.log(f"Execution Time     : {execution_time:.2f}s", isShowTimestamp=False)
-        Helper.log("", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("Pipeline", isShowTimestamp=False)
+    #     Helper.log("-" * 8, isShowTimestamp=False)
+    #     Helper.log(f"Execution Time     : {execution_time:.2f}s", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
 
-        Helper.log("=" * 50, isShowTimestamp=False)
+    #     Helper.log("=" * 50, isShowTimestamp=False)
         
-        return {
-            "timestamp": datetime.now().isoformat(),
-            "total_records": int(total_rows),
-            "valid_records": len(valid_data),
-            "invalid_records": {
-                "total": len(invalid_data),
-                "invalid_duration": stats['invalid_duration'],
-                "invalid_distance": stats['invalid_distance']
-            },
-            "execution_time_seconds": round(execution_time, 2)
-        }
+    #     return {
+    #         "timestamp": datetime.now().isoformat(),
+    #         "total_records": int(total_rows),
+    #         "valid_records": len(valid_data),
+    #         "invalid_records": {
+    #             "total": len(invalid_data),
+    #             "invalid_duration": stats['invalid_duration'],
+    #             "invalid_distance": stats['invalid_distance']
+    #         },
+    #         "execution_time_seconds": round(execution_time, 2)
+    #     }

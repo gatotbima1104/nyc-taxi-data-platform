@@ -1,5 +1,7 @@
 from scripts.extract import Extract
 from scripts.database_connection import DatabaseConnection
+from scripts.layers import Loader
+
 from utils.helpers import Helper
 from utils.constants import (
     TAXI_URL,
@@ -35,6 +37,11 @@ def extract():
         extractor.extract(url, filename)
     
     Helper.log(message="Extract successfully ...")
+    
+def load_to_bronze():
+    Loader(conn).load_to_bronze()
+    Helper.log(message="Load successfully ...")
 
 if __name__ == "__main__":
     extract()
+    load_to_bronze()

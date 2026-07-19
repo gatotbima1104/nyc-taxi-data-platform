@@ -8,7 +8,7 @@ class Config:
         "PULocationID",
         "DOLocationID",
         "payment_type",
-    ],
+    ]
     LOAD_TO_BRONZE_CONFIGS = [
         {
             "file": Path("data/raw/yellow_tripdata_2026_01.parquet"),
@@ -20,7 +20,7 @@ class Config:
             "table": "raw_taxi_lookup",
             "layer": "bronze"
         },
-    ],
+    ]
     BRONZE = {
         "RAW_TAXI_TRIPS": "bronze.raw_taxi_trips",
         "RAW_TAXI_LOOKUP": "bronze.raw_taxi_lookup"
