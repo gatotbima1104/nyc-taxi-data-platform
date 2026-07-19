@@ -93,7 +93,7 @@ class QualityCheck:
             if not exists:
                 raise ValueError(f"[FAIL] Schema '{schema_name}' does not exist.")
 
-        Helper.unit_test_log(f"Schema '{schema_name}' exists")
+        # Helper.unit_test_log(f"Schema '{schema_name}' exists")
         
     def table_exists(self, table_name: str):
         """" Table Exists """
@@ -108,4 +108,4 @@ class QualityCheck:
             if not exists:
                 raise ValueError(f"[FAIL] Table '{table_name}' does not exist.")
 
-        Helper.unit_test_log(f"Table '{table_name}' exists")
+        # Helper.unit_test_log(f"Table '{table_name}' exists")

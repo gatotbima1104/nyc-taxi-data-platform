@@ -19,11 +19,13 @@ def check_schemas_tables():
     
     for schema in Config.REQUIRED_SCHEMAS:
         qc.schema_exists(schema)
+        
+    Helper.unit_test_log("Database schemas validated")
 
     for table in Config.REQUIRED_TABLES:
         qc.table_exists(table)
     
-    Helper.unit_test_log("Quality check passed ...")
+    Helper.unit_test_log("Database tables validated")
     
 def extract():
     extract_files = [
