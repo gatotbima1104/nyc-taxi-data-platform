@@ -29,8 +29,8 @@ class Helper:
             raise ValueError(
                 f"Unsopported file format: {suffix}"
             )
-            
-        print(f'[INFO] Load {suffix} data ...')
+        
+        Helper.log(f"Load {suffix} data ...")
         return Helper.LOADERS[suffix](filepath) # pd.read_csv(filepath)
         
     @staticmethod
@@ -47,6 +47,15 @@ class Helper:
             print(f"[INFO] {timestamp} - {message}", flush=True)
         else:
             print(f"[INFO] {message}", flush=True)
+            
+    @staticmethod
+    def unit_test_log(message: str, isShowTimestamp: bool = True) -> str:
+        """logging unit test information"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if isShowTimestamp:
+            print(f"[PASSED] {timestamp} - {message}", flush=True)
+        else:
+            print(f"[PASSED] {message}", flush=True)
 
     @staticmethod
     def measure(step_name: str, func: Callable):

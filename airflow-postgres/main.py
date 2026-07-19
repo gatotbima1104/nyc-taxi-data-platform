@@ -43,10 +43,7 @@ def check_quality_file():
     qc = QualityCheck(conn)
     
     for load in Config.LOAD_TO_BRONZE_CONFIGS:
-        if load["type"] == "parquet":
-            qc.validate_parquet(load["file"])
-        else:
-            qc.validate_csv(load["file"])
+        qc.validate_file(load["file"])
         
     Helper.log("Quality check passed ...")
     

@@ -15,7 +15,7 @@ class Extract:
             Helper.create_dir(output_path) # Make a dir from helper
             
             if output_path.exists():
-                print(f"[INFO] ✓ File already exists: {output_path.relative_to(self.base_dir)}")
+                Helper.log(f"File already exists: {output_path.relative_to(self.base_dir)} ✓")
                 return output_path
             
             with requests.get(url=url, stream=True, timeout=30) as response:
@@ -38,6 +38,6 @@ class Extract:
     
     def extract(self, url: str, filename: str) -> Path:  
         """ Ingesting data from downloaded file """
-        print(f"[INFO] EXTRACT {filename}")
+        Helper.log(f"EXTRACT {filename}")
         output_path = (self.base_dir / ".." / "data" / "raw" / filename)
         return self.download_file(url, output_path)

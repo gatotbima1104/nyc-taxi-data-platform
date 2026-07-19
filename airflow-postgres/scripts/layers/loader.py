@@ -49,8 +49,8 @@ class Loader:
 
         self.conn.commit()
 
-        print(
-            f"[INFO] Load to {'BRONZE' if layer == 'bronze' else 'SILVER' if layer == 'silver' else 'GOLD'} successfully loaded {len(df):,} rows --> bronze.{table_name}"
+        Helper.log(
+            f"Load to {'BRONZE' if layer == 'bronze' else 'SILVER' if layer == 'silver' else 'GOLD'} successfully loaded {len(df):,} rows --> bronze.{table_name}"
         )
     
     def load_to_bronze(self) -> None:
