@@ -11,12 +11,12 @@ class Config:
     ],
     LOAD_TO_BRONZE_CONFIGS = [
         {
-            "file": Path("data_lake/raw/yellow_tripdata_2026_01.parquet"),
+            "file": Path("data/raw/yellow_tripdata_2026_01.parquet"),
             "table": "raw_taxi_trips",
             "layer": "bronze"
         },
         {
-            "file": Path("data_lake/raw/taxi_zone_lookup.csv"),
+            "file": Path("data/raw/taxi_zone_lookup.csv"),
             "table": "raw_taxi_lookup",
             "layer": "bronze"
         },
