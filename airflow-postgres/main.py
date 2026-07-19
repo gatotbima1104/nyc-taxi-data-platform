@@ -4,29 +4,27 @@ from scripts.layers import ( Loader, QualityCheck )
 from scripts.configs import Config
 
 from utils.helpers import Helper
-from utils.constants import (
-    TAXI_URL,
-    TAXI_ZONE_LOOKUP_URL,
-    TAXI_DATA_FILENAME,
-    TAXI_ZONE_LOOKUP_TABLE,
-    
-    POSTGRES_HOST,
-    POSTGRES_PORT,
-    POSTGRES_DB,
-    POSTGRES_USER,
-    POSTGRES_PASSWORD
-)
+from utils.constants import (TAXI_URL, TAXI_ZONE_LOOKUP_URL, TAXI_DATA_FILENAME, TAXI_ZONE_LOOKUP_TABLE,
+                             POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
+                             )
 
 # Make Connection
-conn = DatabaseConnection(
-    host=POSTGRES_HOST,
-    port=POSTGRES_PORT,
-    dbname=POSTGRES_DB,
-    user=POSTGRES_USER,
-    password=POSTGRES_PASSWORD
-).get_connection_psycopg2()
+conn = DatabaseConnection(host=POSTGRES_HOST, port=POSTGRES_PORT, dbname=POSTGRES_DB,
+                          user=POSTGRES_USER,password=POSTGRES_PASSWORD
+                          ).get_connection_psycopg2()
 
 # Extract 
+def check_schemas_tables():
+    qc = QualityCheck(conn)
+    
+    for schema in Config.REQUIRED_SCHEMAS:
+        qc.schema_exists(schema)
+
+    for table in Config.REQUIRED_TABLES:
+        qc.table_exists(table)
+    
+    Helper.unit_test_log("Quality check passed ...")
+    
 def extract():
     extract_files = [
         (TAXI_URL, TAXI_DATA_FILENAME),
@@ -45,13 +43,14 @@ def check_quality_file():
     for load in Config.LOAD_TO_BRONZE_CONFIGS:
         qc.validate_file(load["file"])
         
-    Helper.log("Quality check passed ...")
+    Helper.unit_test_log("Quality check passed ...")
     
 def load_to_bronze():
     Loader(conn).load_to_bronze()
     Helper.log(message="Load successfully ...")
 
 if __name__ == "__main__":
+    check_schemas_tables()
     extract()
     check_quality_file()
     load_to_bronze()

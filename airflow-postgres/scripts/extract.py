@@ -15,7 +15,7 @@ class Extract:
             Helper.create_dir(output_path) # Make a dir from helper
             
             if output_path.exists():
-                Helper.log(f"File already exists: {output_path.relative_to(self.base_dir)} ✓")
+                Helper.log(f"File already exists: {output_path.relative_to(self.base_dir)}")
                 return output_path
             
             with requests.get(url=url, stream=True, timeout=30) as response:

@@ -1,6 +1,7 @@
 import os
 import csv
 import pyarrow.parquet as pq
+import psycopg2.extensions as pse
 from datetime import datetime
 from scripts.configs import Config
 from utils.helpers import Helper
@@ -10,7 +11,7 @@ class QualityCheck:
     
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    def __init__(self, conn):
+    def __init__(self, conn: pse.connection):
         self.conn = conn
         
     def __file_exists(self, filepath: str, timestamp=timestamp) -> None:
@@ -18,19 +19,19 @@ class QualityCheck:
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"[FAIL] File not found {filepath}")
         
-        Helper.unit_test_log("Check Existing File ✓")
+        Helper.unit_test_log("Check Existing File")
         
     def __file_not_empty(self, filepath: str) -> None:
         """ Check file not empty """
         if os.path.getsize(filepath) == 0:
             raise ValueError(f"[FAIL] File is empty {filepath}")
         
-        Helper.unit_test_log("Check File not empty ✓")
+        Helper.unit_test_log("Check File not empty")
         
     def __validate_parquet(self, filepath: str) -> pq.ParquetFile:
         """ Validate parquet """
         try:
-            Helper.unit_test_log("Validating File ✓")
+            Helper.unit_test_log("Validating File")
             return pq.ParquetFile(filepath)
         except Exception as e:
             raise ValueError(f"[FAIL] Invalid parquet file: {e}")
@@ -48,10 +49,10 @@ class QualityCheck:
                 f"[FAIL] Missing required columns: {', '.join(missing_cols)}"
             )
         
-        Helper.unit_test_log("Validate required columns ✓")
+        Helper.unit_test_log("Validate required columns")
 
     def validate_file(self, filepath: Path):
-        """" Validate parquet """
+        """" Validate file """
         self.__file_exists(filepath)
         self.__file_not_empty(filepath)
         
@@ -72,3 +73,39 @@ class QualityCheck:
             )
         else:
             raise ValueError(f"[FAIL] Unsupported type file: {filepath}")
+        
+    def schema_exists(self, schema_name: str) -> None:
+        """" Schema Exists """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM information_schema.schemata
+                    WHERE schema_name = %s
+                );
+                """,
+                (schema_name,)
+            )
+
+            exists = cur.fetchone()[0]
+
+            if not exists:
+                raise ValueError(f"[FAIL] Schema '{schema_name}' does not exist.")
+
+        Helper.unit_test_log(f"Schema '{schema_name}' exists")
+        
+    def table_exists(self, table_name: str):
+        """" Table Exists """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                "SELECT to_regclass(%s) IS NOT NULL;",
+                (table_name,)
+            )
+
+            exists = cur.fetchone()[0]
+
+            if not exists:
+                raise ValueError(f"[FAIL] Table '{table_name}' does not exist.")
+
+        Helper.unit_test_log(f"Table '{table_name}' exists")

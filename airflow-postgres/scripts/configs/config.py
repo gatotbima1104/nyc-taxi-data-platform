@@ -1,35 +1,16 @@
 from pathlib import Path
 
 class Config:
-    PANDAS_NULLABLE_INTS = [
-        "VendorID",
-        "passenger_count",
-        "RatecodeID",
-        "PULocationID",
-        "DOLocationID",
-        "payment_type",
-    ]
+    PANDAS_NULLABLE_INTS = ["VendorID", "passenger_count", "RatecodeID",
+                            "PULocationID", "DOLocationID", "payment_type"]
     
-    REQUIRE_PARQUET_COLUMNS = [
-        "VendorID",
-        "tpep_pickup_datetime",
-        "tpep_dropoff_datetime",
-        "passenger_count",
-        "trip_distance",
-        "RatecodeID",
-        "PULocationID",
-        "DOLocationID",
-        "payment_type",
-        "fare_amount",
-        "tip_amount",
-        "tolls_amount",
-        "total_amount"
-    ]
+    REQUIRE_PARQUET_COLUMNS = ["VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
+                               "passenger_count", "trip_distance", "RatecodeID", "PULocationID",
+                               "DOLocationID", "payment_type", "fare_amount", "tip_amount",
+                               "tolls_amount", "total_amount"]
     
-    REQUIRE_CSV_COLUMNS = [
-        "LocationID","Borough","Zone","service_zone"
-    ]
-    
+    REQUIRE_CSV_COLUMNS = [ "LocationID","Borough","Zone","service_zone" ]
+
     LOAD_TO_BRONZE_CONFIGS = [
         {
             "file": Path("data/raw/yellow_tripdata_2026_01.parquet"),
@@ -50,3 +31,10 @@ class Config:
         "RAW_TAXI_TRIPS": "bronze.raw_taxi_trips",
         "RAW_TAXI_LOOKUP": "bronze.raw_taxi_lookup"
     }
+    
+    REQUIRED_SCHEMAS = ["bronze", "silver", "gold", "audit"]
+    REQUIRED_TABLES = ["bronze.raw_taxi_trips", "bronze.raw_taxi_lookup",
+                       "silver.taxi_trips_cleaned", "silver.taxi_zones", "silver.data_quality_issues",
+                       "gold.daily_summary", "gold.hourly_demand_summary", "gold.zone_performance_summary",
+                       "gold.payment_behavior_summary", "gold.route_performance_summary",
+                       "audit.logs"]
