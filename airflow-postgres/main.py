@@ -8,8 +8,7 @@ from scripts.configs import Config
 
 from utils.helpers import Helper
 from utils.constants import (TAXI_URL, TAXI_ZONE_LOOKUP_URL, TAXI_DATA_FILENAME, TAXI_ZONE_LOOKUP_TABLE,
-                             POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
-                             )
+                             POSTGRES_HOST, POSTGRES_PORT, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD)
 
 # Make Connection
 conn = DatabaseConnection(host=POSTGRES_HOST, port=POSTGRES_PORT, dbname=POSTGRES_DB,
@@ -22,12 +21,12 @@ def check_schemas_tables():
     for schema in Config.REQUIRED_SCHEMAS:
         qc.schema_exists(schema)
         
-    Helper.unit_test_log("Database schemas validated")
+    Helper.unit_test_log("Database Schemas Validated")
 
     for table in Config.REQUIRED_BRONZE_TABLES:
         qc.table_exists(table)
     
-    Helper.unit_test_log("Database tables validated")
+    Helper.unit_test_log("Database Tables Validated")
     
 def extract():
     extract_files = [
@@ -45,20 +44,21 @@ def check_quality_file():
     for load in Config.LOAD_TO_BRONZE_CONFIGS:
         qc.validate_file(load["file"])
         
-    Helper.unit_test_log("Quality check file passed")
+    Helper.unit_test_log("Quality Check File Validated")
     
 def load_to_bronze():
     Loader(conn).load_to_bronze()
     Helper.log(message="Load successfully")
 
 def check_bronze_table():
-    for table in ["raw_taxi_trips", "raw_taxi_lookup"]:
-        qc.validate_rows(schema='bronze', table_name=table)
+    for table in Config.REQUIRED_BRONZE_TABLES:
+        qc.table_exists(table)
+        qc.validate_rows(table_name=table)
 
-    Helper.unit_test_log("Rows check passed")
+    Helper.unit_test_log("Bronze Tables & Rows Validated")
 
 def run_dbt():
-     Helper.log(message="Running dbt")
+     Helper.log("Building Silver and Gold layers using dbt...")
      
      dbt_path = Path("/app/dbt_project/taxi_dbt")
      subprocess.run(
@@ -67,13 +67,22 @@ def run_dbt():
          check=True
      )
      
-     Helper.log("dbt build completed")
+     Helper.log("Silver and Gold layers built successfully.")
 
-def check_silver_table():
-    for table in ["fact_taxi_trips", "dim_taxi_zone", "data_quality_issues"]:
-        qc.validate_rows(schema='silver', table_name=table)
+def check_silver_table_rows():
+    for table in Config.REQUIRED_SILVER_TABLES:
+        qc.table_exists(table)
+        qc.validate_rows(table_name=table)
 
-    Helper.unit_test_log("Rows check passed")
+    Helper.unit_test_log("Silver Tables & Rows Validated")
+
+def check_mart_table_rows():
+    for table in Config.REQUIRED_MARTS_TABLES:
+        qc.table_exists(table)
+        qc.validate_rows(table_name=table)
+
+    Helper.unit_test_log("Mart Tables & Rows Validated")
+
     
 if __name__ == "__main__":
     check_schemas_tables()
@@ -82,4 +91,5 @@ if __name__ == "__main__":
     load_to_bronze()
     check_bronze_table()
     run_dbt()
-    check_silver_table()
+    check_silver_table_rows()
+    check_mart_table_rows()

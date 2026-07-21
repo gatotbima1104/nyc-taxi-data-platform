@@ -106,20 +106,22 @@ class QualityCheck:
             if not exists:
                 raise ValueError(f"[FAIL] Table '{table_name}' does not exist.")
             
-    def validate_rows(self, table_name: str, schema: str):
+    def validate_rows(self, table_name: str, schema: str | None = None):
         """" Validate Rows not null """
+        full_table_name = f"{schema}.{table_name}" if schema else table_name
+        
         with self.conn.cursor() as cur:
             cur.execute(
                 f"""
                     SELECT
                         COUNT(*)
-                    FROM {schema}.{table_name}
+                    FROM {full_table_name}
                 """
             )
 
-            has_rows = cur.fetchone()[0]
-            if not has_rows:
-                raise ValueError(f"[FAIL] Rows '{schema}.{table_name}' do not valid")
+            row_count = cur.fetchone()[0]
+            if row_count == 0:
+                raise ValueError(f"[FAIL] Table '{full_table_name}' contains no rows")
             
             return True
             
