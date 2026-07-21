@@ -6,3 +6,12 @@ __pycache__/
 *.csv
 
 logs/
+notes/
+
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+
+# If using a local profile
+dbt_project/.dbt/.user.yml

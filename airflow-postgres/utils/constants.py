@@ -4,7 +4,7 @@ import os
 
 load_dotenv()
 
-POSTGRES_HOST = os.getenv("POSTGRES_HOST") or "db"
+POSTGRES_HOST = os.getenv("POSTGRES_HOST") or "postgres"
 POSTGRES_PORT = int(os.getenv("POSTGRES_PORT")) or 5432
 POSTGRES_DB = os.getenv("POSTGRES_DB") or ""
 POSTGRES_USER = os.getenv("POSTGRES_USER") or "postgres"

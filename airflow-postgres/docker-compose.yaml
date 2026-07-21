@@ -1,27 +1,34 @@
 services:
   pipeline:
-    container_name: nyc-taxi-pipeline
     build: .
+    container_name: taxi-pipeline
     env_file:
       - .env
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs
-    networks:
-      - nyc-networks
+      - ./dbt_project:/app/dbt_project
+      - ./dbt_project/.dbt:/root/.dbt
     depends_on:
-      db:
+      postgres:
         condition: service_healthy
-  db:
+    networks:
+      - app-networks
+    stdin_open: true
+    tty: true
+  
+  postgres:
     image: postgres:16-alpine
-    container_name: nyc-taxi-db
-    ports:
-      - 5433:5432
+    container_name: taxi-postgres
     env_file:
       - .env
+    ports:
+      - 5433:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init:/docker-entrypoint-initdb.d
+    networks:
+      - app-networks
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
@@ -29,11 +36,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    networks:
-      - nyc-networks
 
 volumes:
   postgres_data:
 
 networks:
-  nyc-networks:
+  app-networks:

@@ -6,3 +6,5 @@ requests
 sqlalchemy
 tqdm
 pandas
+dbt-core
+dbt-postgres

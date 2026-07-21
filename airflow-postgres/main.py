@@ -1,3 +1,6 @@
+import subprocess
+from pathlib import Path
+
 from scripts.extract import Extract
 from scripts.database_connection import DatabaseConnection
 from scripts.layers import ( Loader, QualityCheck )
@@ -48,15 +51,35 @@ def load_to_bronze():
     Loader(conn).load_to_bronze()
     Helper.log(message="Load successfully")
 
-def check_bronze_size():
+def check_bronze_table():
     for table in ["raw_taxi_trips", "raw_taxi_lookup"]:
         qc.validate_rows(schema='bronze', table_name=table)
 
     Helper.unit_test_log("Rows check passed")
 
+def run_dbt():
+     Helper.log(message="Running dbt")
+     
+     dbt_path = Path("/app/dbt_project/taxi_dbt")
+     subprocess.run(
+         ["dbt", "build"],
+         cwd=dbt_path,
+         check=True
+     )
+     
+     Helper.log("dbt build completed")
+
+def check_silver_table():
+    for table in ["fact_taxi_trips", "dim_taxi_zone", "data_quality_issues"]:
+        qc.validate_rows(schema='silver', table_name=table)
+
+    Helper.unit_test_log("Rows check passed")
+    
 if __name__ == "__main__":
     check_schemas_tables()
     extract()
     check_quality_file()
     load_to_bronze()
-    check_bronze_size()
+    check_bronze_table()
+    run_dbt()
+    check_silver_table()
