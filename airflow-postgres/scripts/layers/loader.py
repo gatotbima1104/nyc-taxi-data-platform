@@ -45,6 +45,11 @@ class Loader:
         """
         with self.conn as conn:
             with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                        TRUNCATE TABLE bronze.{table_name} RESTART IDENTITY;
+                    """
+                )
                 cur.copy_expert(sql, buffer)
 
         self.conn.commit()
