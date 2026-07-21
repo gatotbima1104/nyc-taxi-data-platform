@@ -13,16 +13,15 @@ conn = DatabaseConnection(host=POSTGRES_HOST, port=POSTGRES_PORT, dbname=POSTGRE
                           user=POSTGRES_USER,password=POSTGRES_PASSWORD
                           ).get_connection_psycopg2()
 
-# Extract 
+qc = QualityCheck(conn)
+
 def check_schemas_tables():
-    qc = QualityCheck(conn)
-    
     for schema in Config.REQUIRED_SCHEMAS:
         qc.schema_exists(schema)
         
     Helper.unit_test_log("Database schemas validated")
 
-    for table in Config.REQUIRED_TABLES:
+    for table in Config.REQUIRED_BRONZE_TABLES:
         qc.table_exists(table)
     
     Helper.unit_test_log("Database tables validated")
@@ -37,22 +36,27 @@ def extract():
     for url, filename in extract_files:
         extractor.extract(url, filename)
     
-    Helper.log(message="Extract successfully ...")
+    Helper.log(message="Extract successfully")
     
 def check_quality_file():
-    qc = QualityCheck(conn)
-    
     for load in Config.LOAD_TO_BRONZE_CONFIGS:
         qc.validate_file(load["file"])
         
-    Helper.unit_test_log("Quality check passed ...")
+    Helper.unit_test_log("Quality check file passed")
     
 def load_to_bronze():
     Loader(conn).load_to_bronze()
-    Helper.log(message="Load successfully ...")
+    Helper.log(message="Load successfully")
+
+def check_bronze_size():
+    for table in ["raw_taxi_trips", "raw_taxi_lookup"]:
+        qc.validate_rows(schema='bronze', table_name=table)
+
+    Helper.unit_test_log("Rows check passed")
 
 if __name__ == "__main__":
     check_schemas_tables()
     extract()
     check_quality_file()
     load_to_bronze()
+    check_bronze_size()

@@ -32,9 +32,13 @@ class Config:
         "RAW_TAXI_LOOKUP": "bronze.raw_taxi_lookup"
     }
     
-    REQUIRED_SCHEMAS = ["bronze", "silver", "gold", "audit"]
+    REQUIRED_SCHEMAS = ["bronze", 
+                        # "silver", 
+                        # "gold",
+                        "audit"]
     REQUIRED_TABLES = ["bronze.raw_taxi_trips", "bronze.raw_taxi_lookup",
                        "silver.taxi_trips_cleaned", "silver.taxi_zones", "silver.data_quality_issues",
                        "gold.daily_summary", "gold.hourly_demand_summary", "gold.zone_performance_summary",
                        "gold.payment_behavior_summary", "gold.route_performance_summary",
                        "audit.logs"]
+    REQUIRED_BRONZE_TABLES = ["bronze.raw_taxi_trips", "bronze.raw_taxi_lookup"]

@@ -92,8 +92,6 @@ class QualityCheck:
 
             if not exists:
                 raise ValueError(f"[FAIL] Schema '{schema_name}' does not exist.")
-
-        # Helper.unit_test_log(f"Schema '{schema_name}' exists")
         
     def table_exists(self, table_name: str):
         """" Table Exists """
@@ -107,5 +105,21 @@ class QualityCheck:
 
             if not exists:
                 raise ValueError(f"[FAIL] Table '{table_name}' does not exist.")
+            
+    def validate_rows(self, table_name: str, schema: str):
+        """" Validate Rows not null """
+        with self.conn.cursor() as cur:
+            cur.execute(
+                f"""
+                    SELECT
+                        COUNT(*)
+                    FROM {schema}.{table_name}
+                """
+            )
 
-        # Helper.unit_test_log(f"Table '{table_name}' exists")
+            has_rows = cur.fetchone()[0]
+            if not has_rows:
+                raise ValueError(f"[FAIL] Rows '{schema}.{table_name}' do not valid")
+            
+            return True
+            
