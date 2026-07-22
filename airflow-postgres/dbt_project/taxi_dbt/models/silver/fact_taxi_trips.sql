@@ -1,5 +1,7 @@
+{{ config(materialized='table') }}
+
 select
-    vendor_id,
+    vendor_id::integer,
     pickup_datetime::timestamp,
     dropoff_datetime::timestamp,
 

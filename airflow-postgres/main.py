@@ -57,10 +57,19 @@ def check_bronze_table():
 
     Helper.unit_test_log("Bronze Tables & Rows Validated")
 
-def run_dbt():
+def build_silver_and_mart_dbt():
      Helper.log("Building Silver and Gold layers using dbt...")
      
      dbt_path = Path("/app/dbt_project/taxi_dbt")
+     
+     if not (dbt_path / "dbt_packages").exists():
+        Helper.log("Installing dbt packages")
+        subprocess.run(
+            ["dbt", "deps"],
+            cwd=dbt_path,
+            check=True
+        )
+     
      subprocess.run(
          ["dbt", "build"],
          cwd=dbt_path,
@@ -82,7 +91,6 @@ def check_mart_table_rows():
         qc.validate_rows(table_name=table)
 
     Helper.unit_test_log("Mart Tables & Rows Validated")
-
     
 if __name__ == "__main__":
     check_schemas_tables()
@@ -90,6 +98,6 @@ if __name__ == "__main__":
     check_quality_file()
     load_to_bronze()
     check_bronze_table()
-    run_dbt()
+    build_silver_and_mart_dbt()
     check_silver_table_rows()
     check_mart_table_rows()

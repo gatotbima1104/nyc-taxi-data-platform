@@ -1,5 +1,7 @@
+{{ config(materialized='table') }}
+
 select
-    vendor_id,
+    vendor_id::integer,
     pickup_datetime::timestamp,
     dropoff_datetime::timestamp,
 
@@ -29,7 +31,7 @@ select
     coalesce(tip_amount::numeric(10,2), -999) as tip_amount,
     coalesce(total_amount::numeric(10,2), -999) as total_amount,
 
-    date(pickup_datetime),
+    date(pickup_datetime) as pickup_date,
     extract(hour from pickup_datetime)::integer as pickup_hour,
     trim(to_char(pickup_datetime,'Day')) as pickup_day_time,
     case 
