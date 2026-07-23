@@ -15,3 +15,4 @@ dbt_project/dbt_packages/
 
 # If using a local profile
 dbt_project/.dbt/.user.yml
+airflow/config/

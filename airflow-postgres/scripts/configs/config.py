@@ -1,6 +1,13 @@
 from pathlib import Path
 
 class Config:
+        
+    PROJECT_ROOT = Path(__file__).resolve().parents[2]
+    DATA_DIR = PROJECT_ROOT / "data"
+    RAW_DATA_DIR = DATA_DIR / "raw"
+    SQL_DIR = PROJECT_ROOT / "sql"
+    DBT_DIR = PROJECT_ROOT / "dbt_project"
+    PROFILE_DBT_DIR = DBT_DIR / ".dbt"
     
     PANDAS_NULLABLE_INTS = [
             "VendorID",
@@ -36,14 +43,14 @@ class Config:
 
     LOAD_TO_BRONZE_CONFIGS = [
         {
-            "file": Path("data/raw/yellow_tripdata_2026_01.parquet"),
+            "file": RAW_DATA_DIR / "yellow_tripdata_2026_01.parquet",
             "table": "raw_taxi_trips",
             "layer": "bronze",
             "type": "parquet",
             "required_columns": REQUIRE_PARQUET_COLUMNS,
         },
         {
-            "file": Path("data/raw/taxi_zone_lookup.csv"),
+            "file": RAW_DATA_DIR / "taxi_zone_lookup.csv",
             "table": "raw_taxi_lookup",
             "layer": "bronze",
             "type": "csv",
