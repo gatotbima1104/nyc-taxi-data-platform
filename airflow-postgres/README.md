@@ -142,6 +142,8 @@ Default login:
 
 # Running the Pipeline
 
+![alt text](docs/taxi_pipeline-graph.png)
+
 Enable the DAG named **taxi_pipeline**.
 
 Click **Trigger DAG**.
@@ -185,6 +187,8 @@ Generate dbt Documentation
 
 ## Bronze
 
+![alt text](docs/bronze.png)
+
 Stores the raw datasets loaded into PostgreSQL.
 
 Tables:
@@ -195,6 +199,8 @@ Tables:
 ---
 
 ## Silver
+
+![alt text](docs/silver.png)
 
 Contains cleaned and transformed data.
 
@@ -220,6 +226,8 @@ data/processed/processed_taxi_trips.parquet
 ---
 
 ## Gold
+
+![alt text](docs/gold.png)
 
 Contains business-ready tables for analytics and reporting.
 
