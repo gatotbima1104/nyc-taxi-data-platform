@@ -1,5 +1,6 @@
 import subprocess
 import shutil
+import os
 from pathlib import Path
 
 from scripts.extract import Extract
@@ -90,6 +91,7 @@ def build_silver_and_mart_dbt():
      
       # Clean old packages
      shutil.rmtree(dbt_path / "dbt_packages", ignore_errors=True)
+     env = os.environ.copy()
 
      lock_file = dbt_path / "package-lock.yml"
      if lock_file.exists():
@@ -102,6 +104,7 @@ def build_silver_and_mart_dbt():
                 "deps"
             ],
             cwd=dbt_path,
+            env=env,
             check=True
      )
      
@@ -113,6 +116,7 @@ def build_silver_and_mart_dbt():
                 "--vars", f'{{"trip_month":"{month}"}}'
             ],
             cwd=dbt_path,
+            env=env,
             check=True
      )
      
@@ -137,3 +141,33 @@ def check_mart_table_rows():
         qc.validate_rows(table_name=table)
 
     Helper.unit_test_log("Mart Tables & Rows Validated")
+
+def generate_dbt_docs():
+    """
+    Generate dbt documentation.
+    """
+
+    Helper.log("Generating dbt documentation...")
+
+    dbt_path = Config.DBT_DIR / "taxi_dbt"
+    profile_dbt = Config.PROFILE_DBT_DIR
+    month = Helper.get_trip_month(TAXI_DATA_FILENAME)
+
+    env = os.environ.copy()
+
+    subprocess.run(
+        [
+            "dbt",
+            "docs",
+            "generate",
+            "--profiles-dir",
+            str(profile_dbt),
+            "--vars",
+            f'{{"trip_month":"{month}"}}',
+        ],
+        cwd=dbt_path,
+        env=env,
+        check=True,
+    )
+
+    Helper.log("dbt documentation generated successfully.")
