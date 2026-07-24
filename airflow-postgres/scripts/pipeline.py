@@ -18,7 +18,8 @@ from utils.constants import (
     POSTGRES_PORT,
     POSTGRES_DB,
     POSTGRES_USER,
-    POSTGRES_PASSWORD
+    POSTGRES_PASSWORD,
+    PROCESSED_DATA
 )
 
 def create_connection():
@@ -80,7 +81,7 @@ def check_bronze_table():
         qc.table_exists(table)
         qc.validate_rows(table_name=table)
 
-    Helper.unit_test_log("Bronze Tables & Rows Validated")
+    Helper.unit_test_log("Bronze Tables & Data Quality Validated")
 
 def build_silver_and_mart_dbt():
      Helper.log("Building Silver and Gold layers using dbt...")
@@ -121,6 +122,18 @@ def build_silver_and_mart_dbt():
      )
      
      Helper.log("Silver and Gold layers built successfully.")
+     
+     conn = create_connection()
+
+    # Export processed_data to data/processed
+     Helper.export_table_to_parquet(
+        conn=conn,
+        table_name="silver.fact_taxi_trips",
+        output_path=Config.PROCESSED_DATA_DIR / PROCESSED_DATA,
+     )
+     
+     conn.close()
+     
 
 def check_silver_table_rows():
     conn = create_connection()
@@ -130,7 +143,21 @@ def check_silver_table_rows():
         qc.table_exists(table)
         qc.validate_rows(table_name=table)
 
-    Helper.unit_test_log("Silver Tables & Rows Validated")
+    # Data quality checks
+    for table, rules in Config.SILVER_DATA_QUALITY.items():
+        for column in rules.get("not_null", []):
+            qc.validate_not_null(
+                table_name=table,
+                column=column
+            )
+
+        for column in rules.get("non_negative", []):
+            qc.validate_non_negative(
+                table_name=table,
+                column=column
+            )
+
+    Helper.unit_test_log("Silver Tables & Data Quality Validated")
 
 def check_mart_table_rows():
     conn = create_connection()
@@ -144,7 +171,7 @@ def check_mart_table_rows():
 
 def generate_dbt_docs():
     """
-    Generate dbt documentation.
+        Generate dbt documentation.
     """
 
     Helper.log("Generating dbt documentation...")

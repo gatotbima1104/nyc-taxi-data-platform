@@ -52,9 +52,9 @@ select
     ) as trip_duration_minutes,
 
     pickup.borough as pickup_borough,
-    pickup.zone as pickup_zone,
+    coalesce(pickup.zone, 'Unknown') as pickup_zone,
     dropoff.borough as dropoff_borough,
-    dropoff.zone as dropoff_zone
+    coalesce(dropoff.zone, 'Unknown') as dropoff_zone
     
 from {{ ref('stg_taxi_trips') }}
 left join {{ ref('stg_taxi_zone') }} pickup

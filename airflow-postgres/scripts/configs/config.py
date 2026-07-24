@@ -3,9 +3,13 @@ from pathlib import Path
 class Config:
         
     PROJECT_ROOT = Path(__file__).resolve().parents[2]
+    
     DATA_DIR = PROJECT_ROOT / "data"
     RAW_DATA_DIR = DATA_DIR / "raw"
+    PROCESSED_DATA_DIR = DATA_DIR / "processed"
+    
     SQL_DIR = PROJECT_ROOT / "sql"
+    
     DBT_DIR = PROJECT_ROOT / "dbt_project"
     PROFILE_DBT_DIR = DBT_DIR / ".dbt"
     
@@ -100,3 +104,23 @@ class Config:
             "gold.zone_performance"
             ]
     
+    # Data Quality    
+    SILVER_DATA_QUALITY = {
+        "silver.fact_taxi_trips": {
+                "not_null": [
+                        "pickup_datetime",
+                        "dropoff_datetime",
+                        "pickup_date",
+                        "pickup_zone",
+                        "dropoff_zone"
+                ],
+                "non_negative": [
+                        "trip_distance",
+                        "trip_duration_minutes",
+                        "total_amount",
+                        "fare_amount",
+                        "passenger_count",
+                        "tip_amount"
+                ]
+                }
+        }

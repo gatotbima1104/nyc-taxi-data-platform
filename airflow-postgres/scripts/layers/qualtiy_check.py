@@ -125,3 +125,49 @@ class QualityCheck:
             
             return True
             
+    def validate_not_null(
+        self,
+        table_name: str,
+        column: str,
+    ):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {table_name}
+                WHERE {column} IS NULL
+                """
+            )
+
+            count = cur.fetchone()[0]
+
+            if count > 0:
+                raise ValueError(
+                    f"[FAIL] {table_name}.{column} contains {count} NULL values."
+                )
+
+        Helper.unit_test_log(f"{table_name}.{column} NOT NULL validated")
+
+
+    def validate_non_negative(
+        self,
+        table_name: str,
+        column: str,
+    ):
+        with self.conn.cursor() as cur:
+            cur.execute(
+                f"""
+                SELECT COUNT(*)
+                FROM {table_name}
+                WHERE {column} < 0
+                """
+            )
+
+            count = cur.fetchone()[0]
+
+            if count > 0:
+                raise ValueError(
+                    f"[FAIL] {table_name}.{column} contains {count} negative values."
+                )
+
+        Helper.unit_test_log(f"{table_name}.{column} non-negative validated")

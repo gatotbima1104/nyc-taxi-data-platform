@@ -16,6 +16,7 @@ TAXI_URL = os.getenv("TAXI_URL") or "https://d37ci6vzurychx.cloudfront.net/trip-
 TAXI_ZONE_LOOKUP_URL = os.getenv("TAXI_ZONE_LOOKUP_URL") or "https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv"
 TAXI_DATA_FILENAME = os.getenv("TAXI_DATA_FILENAME") or "yellow_tripdata_2026-01.parquet"
 TAXI_ZONE_LOOKUP_TABLE = os.getenv("TAXI_ZONE_LOOKUP_TABLE") or "taxi_zone_lookup.csv"
+PROCESSED_DATA = "processed_taxi_trips.parquet"
 CHUNK_SIZE = 8192
 
 # if POSTGRES_HOST == "localhost":

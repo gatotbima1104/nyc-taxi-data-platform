@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable
 from pandas import DataFrame
 from datetime import datetime
+from psycopg2.extensions import connection as PGConnection
 
 class Helper:
     LOADERS = {
@@ -80,6 +81,32 @@ class Helper:
             raise ValueError(f"Invalid filename: {filename}")
 
         return match.group(1)
+    
+    @staticmethod
+    def export_table_to_parquet(
+        conn: PGConnection,
+        table_name: str,
+        output_path: Path,
+    ) -> None:
+        """
+            Export a PostgreSQL table to Parquet
+        """
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        query = f"SELECT * FROM {table_name}"
+
+        df = pd.read_sql(query, conn)
+
+        df.to_parquet(
+            output_path,
+            index=False,
+            compression="snappy",
+        )
+
+        Helper.log(
+            f"Exported '{table_name}' -> '{output_path}'"
+        )
     
     # @staticmethod
     # def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
