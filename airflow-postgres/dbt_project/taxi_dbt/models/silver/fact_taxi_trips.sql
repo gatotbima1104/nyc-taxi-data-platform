@@ -1,5 +1,3 @@
-{{ config(materialized='table') }}
-
 select
     vendor_id::integer,
     pickup_datetime::timestamp,

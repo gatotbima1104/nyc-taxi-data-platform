@@ -1,5 +1,3 @@
-{{ config(materialized='table') }}
-
 select
     location_id::bigint,
     coalesce(borough::text, 'Unknown') as borough,

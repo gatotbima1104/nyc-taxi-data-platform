@@ -20,6 +20,11 @@ x-airflow-common:
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     AIRFLOW_UID: ${AIRFLOW_UID:-50000}
     PYTHONPATH: /opt/airflow/project
+    POSTGRES_HOST: ${DOCKER_POSTGRES_HOST}
+    POSTGRES_PORT: ${DOCKER_POSTGRES_PORT}
+    POSTGRES_DB: ${POSTGRES_DB}
+    POSTGRES_USER: ${POSTGRES_USER}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/logs:/opt/airflow/logs
@@ -36,6 +41,8 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
+      POSTGRES_HOST: ${DOCKER_POSTGRES_HOST}
+      POSTGRES_PORT: ${DOCKER_POSTGRES_PORT}
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
@@ -199,8 +206,10 @@ services:
   db-pipeline:
     image: postgres:16-alpine
     container_name: taxi-postgres
-    env_file:
-      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5433:5432
     volumes:

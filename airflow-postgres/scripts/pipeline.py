@@ -1,4 +1,5 @@
 import subprocess
+import shutil
 from pathlib import Path
 
 from scripts.extract import Extract
@@ -87,16 +88,22 @@ def build_silver_and_mart_dbt():
      profile_dbt = Config.PROFILE_DBT_DIR
      month = Helper.get_trip_month(TAXI_DATA_FILENAME)
      
-     if not (dbt_path / "dbt_packages").exists():
-        Helper.log("Installing dbt packages")
-        subprocess.run(
+      # Clean old packages
+     shutil.rmtree(dbt_path / "dbt_packages", ignore_errors=True)
+
+     lock_file = dbt_path / "package-lock.yml"
+     if lock_file.exists():
+        lock_file.unlink()
+         
+     Helper.log("Installing dbt packages")
+     subprocess.run(
             [
                 "dbt",
                 "deps"
             ],
             cwd=dbt_path,
             check=True
-        )
+     )
      
      subprocess.run(
             [
