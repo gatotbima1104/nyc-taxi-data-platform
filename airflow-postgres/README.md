@@ -200,10 +200,16 @@ Some transformations include:
 - Derived columns
 - Data cleaning
 
+Tables:
+
+- silver.fact_taxi_trips
+- silver.dim_taxi_zone
+- silver.data_quality_issues
+
 The Silver dataset is also exported to:
 
 ```text
-data/processed/silver/sv_taxi_trips.parquet
+data/processed/processed_taxi_trips.parquet
 ```
 
 ---
@@ -296,52 +302,6 @@ http://localhost:8081
 
 ---
 
-# Useful Commands
-
-Start services:
-
-```bash
-docker compose up --build
-```
-
-Stop services:
-
-```bash
-docker compose down
-```
-
-Remove containers and volumes:
-
-```bash
-docker compose down -v
-```
-
-Restart services:
-
-```bash
-docker compose restart
-```
-
-View running containers:
-
-```bash
-docker ps
-```
-
-View Airflow logs:
-
-```bash
-docker compose logs airflow-apiserver
-```
-
-View pipeline logs:
-
-```bash
-docker compose logs db-pipeline
-```
-
----
-
 # Future Improvements
 
 - Incremental dbt models
@@ -351,9 +311,3 @@ docker compose logs db-pipeline
 - Great Expectations integration
 
 ---
-
-# Author
-
-Muhamad Gatot Supiadin
-
-GitHub: https://github.com/gatotbima1104
