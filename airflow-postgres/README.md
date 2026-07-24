@@ -99,7 +99,12 @@ The `.env` file contains:
 - Docker environment variables
 - Pipeline configuration
 
-Update the values if needed.
+Fill this values
+```bash
+POSTGRES_DB=
+POSTGRES_USER=
+POSTGRES_PASSWORD=
+```
 
 ---
 
