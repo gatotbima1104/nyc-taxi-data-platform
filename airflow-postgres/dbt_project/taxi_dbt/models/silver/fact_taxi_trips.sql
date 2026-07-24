@@ -63,7 +63,9 @@ left join {{ ref('stg_taxi_zone') }} pickup
     on pu_location_id = pickup.location_id
 left join {{ ref('stg_taxi_zone') }} dropoff
     on do_location_id = dropoff.location_id
-where pickup_datetime < dropoff_datetime
+where 
+    {{ filter_trip_month('pickup_datetime') }}
+    and pickup_datetime < dropoff_datetime
     and trip_distance > 0
     and passenger_count > 0
     and fare_amount > 0

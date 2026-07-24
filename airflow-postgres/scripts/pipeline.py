@@ -85,19 +85,28 @@ def build_silver_and_mart_dbt():
      
      dbt_path = Config.DBT_DIR / "taxi_dbt"
      profile_dbt = Config.PROFILE_DBT_DIR
+     month = Helper.get_trip_month(TAXI_DATA_FILENAME)
      
      if not (dbt_path / "dbt_packages").exists():
         Helper.log("Installing dbt packages")
         subprocess.run(
-            ["dbt", "deps"],
+            [
+                "dbt",
+                "deps"
+            ],
             cwd=dbt_path,
             check=True
         )
      
      subprocess.run(
-         ["dbt", "build", "--profiles-dir", str(profile_dbt)],
-         cwd=dbt_path,
-         check=True
+            [
+                "dbt", 
+                "build",
+                "--profiles-dir", str(profile_dbt),
+                "--vars", f'{{"trip_month":"{month}"}}'
+            ],
+            cwd=dbt_path,
+            check=True
      )
      
      Helper.log("Silver and Gold layers built successfully.")

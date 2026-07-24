@@ -43,7 +43,7 @@ class Config:
 
     LOAD_TO_BRONZE_CONFIGS = [
         {
-            "file": RAW_DATA_DIR / "yellow_tripdata_2026_01.parquet",
+            "file": RAW_DATA_DIR / "yellow_tripdata_2026-01.parquet",
             "table": "raw_taxi_trips",
             "layer": "bronze",
             "type": "parquet",

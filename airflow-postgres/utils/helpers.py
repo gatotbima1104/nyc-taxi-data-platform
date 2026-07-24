@@ -1,4 +1,5 @@
 import time
+import re
 import pandas as pd
 
 from pathlib import Path
@@ -68,6 +69,17 @@ class Helper:
 
         Helper.log(f"{step_name} completed in {duration:.2f}s")
         return result
+    
+    @staticmethod
+    def get_trip_month(filepath: str) -> str:
+        filename = Path(filepath).name
+
+        match = re.search(r"(\d{4}-\d{2})", filename)
+
+        if not match:
+            raise ValueError(f"Invalid filename: {filename}")
+
+        return match.group(1)
     
     # @staticmethod
     # def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
