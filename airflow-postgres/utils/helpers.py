@@ -1,10 +1,12 @@
 import time
+import re
 import pandas as pd
 
 from pathlib import Path
 from typing import Callable
 from pandas import DataFrame
 from datetime import datetime
+from psycopg2.extensions import connection as PGConnection
 
 class Helper:
     LOADERS = {
@@ -29,8 +31,8 @@ class Helper:
             raise ValueError(
                 f"Unsopported file format: {suffix}"
             )
-            
-        print(f'[LOAD] Loading {suffix} data ...')
+        
+        Helper.log(f"Load {suffix} data ...")
         return Helper.LOADERS[suffix](filepath) # pd.read_csv(filepath)
         
     @staticmethod
@@ -47,6 +49,15 @@ class Helper:
             print(f"[INFO] {timestamp} - {message}", flush=True)
         else:
             print(f"[INFO] {message}", flush=True)
+            
+    @staticmethod
+    def unit_test_log(message: str, isShowTimestamp: bool = True) -> str:
+        """logging unit test information"""
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if isShowTimestamp:
+            print(f"[PASSED] {timestamp} - {message}", flush=True)
+        else:
+            print(f"[PASSED] {message}", flush=True)
 
     @staticmethod
     def measure(step_name: str, func: Callable):
@@ -61,54 +72,91 @@ class Helper:
         return result
     
     @staticmethod
-    def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
-        """reporting dataset information"""
-        total_rows = len(valid_data) + len(invalid_data)
+    def get_trip_month(filepath: str) -> str:
+        filename = Path(filepath).name
 
-        valid_pct = (
-            len(valid_data) / total_rows * 100
-            if total_rows else 0
+        match = re.search(r"(\d{4}-\d{2})", filename)
+
+        if not match:
+            raise ValueError(f"Invalid filename: {filename}")
+
+        return match.group(1)
+    
+    @staticmethod
+    def export_table_to_parquet(
+        conn: PGConnection,
+        table_name: str,
+        output_path: Path,
+    ) -> None:
+        """
+            Export a PostgreSQL table to Parquet
+        """
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        query = f"SELECT * FROM {table_name}"
+
+        df = pd.read_sql(query, conn)
+
+        df.to_parquet(
+            output_path,
+            index=False,
+            compression="snappy",
         )
 
-        invalid_pct = (
-            len(invalid_data) / total_rows * 100
-            if total_rows else 0
+        Helper.log(
+            f"Exported '{table_name}' -> '{output_path}'"
         )
     
-        time.sleep(1)
+    # @staticmethod
+    # def generate_report(valid_data: DataFrame, invalid_data: DataFrame, stats: dict, execution_time: float) -> None:
+    #     """reporting dataset information"""
+    #     total_rows = len(valid_data) + len(invalid_data)
+
+    #     valid_pct = (
+    #         len(valid_data) / total_rows * 100
+    #         if total_rows else 0
+    #     )
+
+    #     invalid_pct = (
+    #         len(invalid_data) / total_rows * 100
+    #         if total_rows else 0
+    #     )
+    
+    #     time.sleep(1)
         
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("DATA QUALITY REPORT", isShowTimestamp=False)
-        Helper.log("", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("DATA QUALITY REPORT", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
 
-        Helper.log("Dataset Summary", isShowTimestamp=False)
-        Helper.log("-" * 15, isShowTimestamp=False)
-        Helper.log(f"Total Records      : {total_rows:,}", isShowTimestamp=False)
-        Helper.log(f"Valid Records      : {len(valid_data):,} ({valid_pct:.2f}%)", isShowTimestamp=False)
-        Helper.log(f"Invalid Records    : {len(invalid_data):,} ({invalid_pct:.2f}%)", isShowTimestamp=False)
+    #     Helper.log("Dataset Summary", isShowTimestamp=False)
+    #     Helper.log("-" * 15, isShowTimestamp=False)
+    #     Helper.log(f"Total Records      : {total_rows:,}", isShowTimestamp=False)
+    #     Helper.log(f"Valid Records      : {len(valid_data):,} ({valid_pct:.2f}%)", isShowTimestamp=False)
+    #     Helper.log(f"Invalid Records    : {len(invalid_data):,} ({invalid_pct:.2f}%)", isShowTimestamp=False)
 
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("Invalid Record Breakdown", isShowTimestamp=False)
-        Helper.log("-" * 24, isShowTimestamp=False)
-        Helper.log(f"Duration Invalid   : {stats['invalid_duration']:,}", isShowTimestamp=False)
-        Helper.log(f"Distance Invalid   : {stats['invalid_distance']:,}", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("Invalid Record Breakdown", isShowTimestamp=False)
+    #     Helper.log("-" * 24, isShowTimestamp=False)
+    #     Helper.log(f"Duration Invalid   : {stats['invalid_duration']:,}", isShowTimestamp=False)
+    #     Helper.log(f"Distance Invalid   : {stats['invalid_distance']:,}", isShowTimestamp=False)
 
-        Helper.log("", isShowTimestamp=False)
-        Helper.log("Pipeline", isShowTimestamp=False)
-        Helper.log("-" * 8, isShowTimestamp=False)
-        Helper.log(f"Execution Time     : {execution_time:.2f}s", isShowTimestamp=False)
-        Helper.log("", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
+    #     Helper.log("Pipeline", isShowTimestamp=False)
+    #     Helper.log("-" * 8, isShowTimestamp=False)
+    #     Helper.log(f"Execution Time     : {execution_time:.2f}s", isShowTimestamp=False)
+    #     Helper.log("", isShowTimestamp=False)
 
-        Helper.log("=" * 50, isShowTimestamp=False)
+    #     Helper.log("=" * 50, isShowTimestamp=False)
         
-        return {
-            "timestamp": datetime.now().isoformat(),
-            "total_records": int(total_rows),
-            "valid_records": len(valid_data),
-            "invalid_records": {
-                "total": len(invalid_data),
-                "invalid_duration": stats['invalid_duration'],
-                "invalid_distance": stats['invalid_distance']
-            },
-            "execution_time_seconds": round(execution_time, 2)
-        }
+    #     return {
+    #         "timestamp": datetime.now().isoformat(),
+    #         "total_records": int(total_rows),
+    #         "valid_records": len(valid_data),
+    #         "invalid_records": {
+    #             "total": len(invalid_data),
+    #             "invalid_duration": stats['invalid_duration'],
+    #             "invalid_distance": stats['invalid_distance']
+    #         },
+    #         "execution_time_seconds": round(execution_time, 2)
+    #     }

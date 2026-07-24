@@ -1,0 +1,331 @@
+version: 2
+
+models:
+  - name: fact_taxi_trips
+
+    config:
+      contract:
+        enforced: true
+
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "pickup_datetime < dropoff_datetime"
+
+    columns:
+      - name: vendor_id
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: pickup_datetime
+        data_type: timestamp
+        data_tests:
+          - not_null
+
+      - name: dropoff_datetime
+        data_type: timestamp
+        data_tests:
+          - not_null
+
+      - name: passenger_count
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: trip_distance
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: rate_code_id
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: store_and_fwd_flag
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Store and Forward', 'Normal', 'Unknown']
+
+      - name: pu_location_id
+        data_type: integer
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_taxi_zone')
+                field: location_id
+
+      - name: do_location_id
+        data_type: integer
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_taxi_zone')
+                field: location_id
+
+      - name: payment_type
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Credit Card', 'Cash', 'No Charge', 'Dispute', 'Unknown']
+
+      - name: fare_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: tip_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: total_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: pickup_date
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: pickup_hour
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 23"
+
+      - name: pickup_day_time
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+      - name: is_weekend
+        data_type: boolean
+        data_tests:
+          - not_null
+
+      - name: time_period
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Late Night', 'Morning', 'Afternoon', 'Evening', 'Night']
+
+      - name: trip_duration_minutes
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: pickup_borough
+        data_type: text
+
+      - name: pickup_zone
+        data_type: text
+
+      - name: dropoff_borough
+        data_type: text
+
+      - name: dropoff_zone
+        data_type: text
+
+  - name: dim_taxi_zone
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: location_id
+        data_type: bigint
+        data_tests:
+          - not_null
+          - unique
+
+      - name: borough
+        data_type: text
+        data_tests:
+          - not_null
+
+      - name: zone
+        data_type: text
+        data_tests:
+          - not_null
+
+      - name: service_zone
+        data_type: text
+        data_tests:
+          - not_null
+
+  - name: data_quality_issues
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: vendor_id
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: pickup_datetime
+        data_type: timestamp
+        data_tests:
+          - not_null
+
+      - name: dropoff_datetime
+        data_type: timestamp
+        data_tests:
+          - not_null
+
+      - name: passenger_count
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: trip_distance
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+
+      - name: rate_code_id
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: store_and_fwd_flag
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Store and Forward', 'Normal', 'Unknown']
+
+      - name: pu_location_id
+        data_type: integer
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_taxi_zone')
+                field: location_id
+
+      - name: do_location_id
+        data_type: integer
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_taxi_zone')
+                field: location_id
+
+      - name: payment_type
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Credit Card', 'Cash', 'No Charge', 'Dispute', 'Unknown']
+
+      - name: fare_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+
+      - name: tip_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+
+      - name: total_amount
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+
+      - name: pickup_date
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: pickup_hour
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 23"
+
+      - name: pickup_day_time
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+      - name: is_weekend
+        data_type: boolean
+        data_tests:
+          - not_null
+
+      - name: time_period
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Late Night', 'Morning', 'Afternoon', 'Evening', 'Night']
+
+      - name: trip_duration_minutes
+        data_type: numeric(10,2)
+        data_tests:
+          - not_null
+
+      - name: pickup_borough
+        data_type: text
+
+      - name: pickup_zone
+        data_type: text
+
+      - name: dropoff_borough
+        data_type: text
+
+      - name: dropoff_zone
+        data_type: text
+
+      - name: error_type
+        data_type: text
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['duration invalid', 'distance invalid', 'passenger invalid', 'fare_amount invalid', 'tip_amount invalid']

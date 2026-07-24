@@ -5,7 +5,7 @@ from enum import StrEnum
 from datetime import datetime
 
 from utils.helpers import Helper
-from configs.config import Config
+from scripts.configs.config import Config
 from scripts.managers import (
     SchemaManager,
     AuditManager
@@ -30,7 +30,7 @@ class Loader:
                 df[column] = df[column].astype("Int64")
         return df
 
-    def load_to_pg(self, filepath: str, table_name: str, layer: Layer | None = None) -> None:
+    def _load_to_pg(self, filepath: str, table_name: str, layer: Layer | None = None) -> None:
         """" Load to postgres """
         df = self._normalize_dtypes(Helper.load_file(filepath))
         buffer = StringIO()
@@ -45,12 +45,17 @@ class Loader:
         """
         with self.conn as conn:
             with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                        TRUNCATE TABLE bronze.{table_name} RESTART IDENTITY;
+                    """
+                )
                 cur.copy_expert(sql, buffer)
 
         self.conn.commit()
 
-        print(
-            f"[LOAD TO {'BRONZE' if layer == 'bronze' else 'SILVER' if layer == 'silver' else 'GOLD'}] successfully loaded {len(df):,} rows --> bronze.{table_name}"
+        Helper.log(
+            f"Load to {'BRONZE' if layer == 'bronze' else 'SILVER' if layer == 'silver' else 'GOLD'} successfully loaded {len(df):,} rows --> bronze.{table_name}"
         )
     
     def load_to_bronze(self) -> None:
@@ -59,7 +64,7 @@ class Loader:
         
         try:  
             for load in Config.LOAD_TO_BRONZE_CONFIGS:
-                self.load_to_pg(
+                self._load_to_pg(
                     load["file"],
                     load["table"],
                     load["layer"]

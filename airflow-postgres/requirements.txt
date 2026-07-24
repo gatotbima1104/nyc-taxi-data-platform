@@ -1,8 +1,9 @@
 dotenv
-pathlib
 psycopg2-binary
 pyarrow
 requests
 sqlalchemy
 tqdm
 pandas
+dbt-core
+dbt-postgres
