@@ -71,6 +71,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    labels:
+      - dev.orbstack.domains=postgres-airflow.local
 
   airflow-scheduler:
     <<: *airflow-common
@@ -253,6 +255,9 @@ services:
     depends_on:
       db-pipeline:
         condition: service_healthy
+
+    labels:
+      - dev.orbstack.domains=dbt-docs.local
 
 volumes:
   postgres-db-volume:

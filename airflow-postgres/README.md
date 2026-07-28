@@ -300,7 +300,7 @@ The pipeline automatically runs
 Open:
 
 ```
-http://localhost:8081
+http://localhost:8081 or https://dbt-docs.local
 ```
 
 ---
@@ -309,9 +309,9 @@ http://localhost:8081
 
 | Service | URL |
 |----------|-----|
-| Airflow | http://localhost:8080 |
+| Airflow | http://localhost:8080 or https://postgres-airflow.local |
 | PostgreSQL | localhost:5433 |
-| dbt Docs | http://localhost:8081 (optional) |
+| dbt Docs | http://localhost:8081 or https://dbt-docs.local |
 
 ---
 
