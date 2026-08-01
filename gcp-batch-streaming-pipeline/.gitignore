@@ -18,3 +18,10 @@ dbt_project/.dbt/.user.yml
 airflow/config/
 *.json
 notes.txt
+
+# dbt ignores
+.user.yml
+target/
+dbt_packages/
+logs/
+.env

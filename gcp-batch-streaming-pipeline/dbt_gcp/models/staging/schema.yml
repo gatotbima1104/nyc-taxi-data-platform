@@ -1,0 +1,107 @@
+version: 2
+
+models:
+  - name: stg_taxi_trips
+    description: >
+      Standardized Green Taxi trip data loaded from the raw dataset.
+      This model renames columns, applies data type conversions,
+      handles null values.
+
+    columns:
+      - name: vendor_id
+        description: Identifier of the taxi vendor.
+        tests:
+          - not_null
+
+      - name: pickup_datetime
+        description: Timestamp when the trip started.
+        tests:
+          - not_null
+
+      - name: dropoff_datetime
+        description: Timestamp when the trip ended.
+        tests:
+          - not_null
+
+      - name: passenger_count
+        description: Number of passengers for the trip.
+
+      - name: trip_distance
+        description: Trip distance in miles.
+
+      - name: rate_code_id
+        description: Rate code assigned to the trip.
+
+      - name: store_and_fwd_flag
+        description: Indicates whether the trip record was held in vehicle memory before being sent to the server.
+
+      - name: pu_location_id
+        description: Pickup Taxi Zone identifier.
+        tests:
+          - not_null
+
+      - name: do_location_id
+        description: Dropoff Taxi Zone identifier.
+        tests:
+          - not_null
+
+      - name: payment_type
+        description: Payment type code from the source system.
+
+      - name: fare_amount
+        description: Base fare charged for the trip.
+
+      - name: tip_amount
+        description: Tip amount paid by the passenger.
+
+      - name: total_amount
+        description: Total trip amount charged.
+
+      - name: extra
+        description: Miscellaneous extra charges.
+
+      - name: mta_tax
+        description: MTA tax amount.
+
+      - name: tolls_amount
+        description: Toll charges collected during the trip.
+
+      - name: improvement_surcharge
+        description: Improvement surcharge applied to the trip.
+
+      - name: congestion_surcharge
+        description: Congestion surcharge amount.
+
+      - name: trip_type
+        description: Trip for a type.
+
+      - name: cbd_congestion_fee
+        description: Central Business District congestion fee.
+
+  - name: stg_taxi_zone
+    description: >
+      Standardized NYC Taxi Zone lookup table loaded from the raw dataset.
+      This model renames columns, applies data type conversions,
+      and replaces null values with default values.
+
+    columns:
+      - name: location_id
+        description: Unique identifier for the taxi zone.
+        tests:
+          - not_null
+          - unique
+
+      - name: borough
+        description: Borough where the taxi zone is located.
+        tests:
+          - not_null
+
+      - name: zone
+        description: Name of the taxi zone.
+        tests:
+          - not_null
+
+      - name: service_zone
+        description: Service zone classification assigned to the taxi zone.
+        tests:
+          - not_null

@@ -1,0 +1,10 @@
+sources:
+  - name: raw
+    description: Raw data trips from jcdeah-009.cp3_gatot_dataset_raw
+    database: jcdeah-009
+    dataset: cp3_gatot_dataset_raw
+    tables:
+      - name: raw_green_taxi
+        description: Raw taxi trips.
+      - name: raw_zone_taxi
+        description: Raw taxi zone.

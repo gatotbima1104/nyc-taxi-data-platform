@@ -1,19 +1,18 @@
 from datetime import datetime, timezone
 
+from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
 from airflow.providers.standard.operators.empty import EmptyOperator
-from setup import DEFAULT_ARGS, GCP_CONN_ID, GCS_TRIPS_SOURCES, GCS_ZONE_SOURCES
-
-from airflow import DAG
 from constants.constant import (
     BQ_DATASET_INTERMEDIATE,
     BQ_DATASET_MART,
-    BQ_DATASET_STAGING,
     BQ_DATASET_RAW,
+    BQ_DATASET_STAGING,
     BUCKET_NAME,
     PROJECT_ID,
 )
+from setup import DEFAULT_ARGS, GCP_CONN_ID, GCS_TRIPS_SOURCES, GCS_ZONE_SOURCES
 
 with DAG(
     dag_id="gatot_dag_batch_pipeline_cp3",
