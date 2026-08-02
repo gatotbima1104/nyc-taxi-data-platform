@@ -1,0 +1,204 @@
+version: 2
+
+models:
+
+  - name: int_01_taxi_enriched
+    description: Time-based enrichment for taxi trips.
+
+    columns:
+      - name: pickup_date
+        data_type: date
+        description: Date of pickup.
+        data_tests:
+          - not_null
+
+      - name: pickup_day_name
+        data_type: string
+        description: Day name of pickup.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+      - name: pickup_hour
+        data_type: int64
+        description: Hour of pickup.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 0 AND 23"
+
+      - name: pickup_month
+        data_type: int64
+        description: Pickup month.
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "BETWEEN 1 AND 12"
+
+      - name: pickup_year
+        data_type: int64
+        description: Pickup year.
+        data_tests:
+          - not_null
+
+      - name: trip_duration_minutes
+        data_type: int64
+        description: Trip duration in minutes.
+        data_tests:
+          - not_null
+
+  - name: int_02_taxi_business
+    description: Business mappings and classifications.
+
+    columns:
+      - name: payment_type_name
+        data_type: string
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Credit Card', 'Cash', 'No Charge', 'Dispute', 'Unknown']
+
+      - name: store_and_fwd_flag_name
+        data_type: string
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Store and Forward', 'Normal', 'Unknown']
+
+      - name: time_period
+        data_type: string
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Late Night', 'Morning', 'Afternoon', 'Evening', 'Night']
+
+      - name: is_weekend
+        data_type: bool
+        data_tests:
+          - not_null
+
+  - name: int_03_taxi_join
+    description: Trip data enriched with taxi zone information.
+
+    columns:
+      - name: pickup_zone
+        data_type: string
+        data_tests:
+          - not_null
+
+      - name: pickup_borough
+        data_type: string
+        data_tests:
+          - not_null
+
+      - name: pickup_service_zone
+        data_type: string
+        data_tests:
+          - not_null
+
+      - name: dropoff_zone
+        data_type: string
+        data_tests:
+          - not_null
+
+      - name: dropoff_borough
+        data_type: string
+        data_tests:
+          - not_null
+
+      - name: dropoff_service_zone
+        data_type: string
+        data_tests:
+          - not_null
+
+  - name: int_taxi_curated
+    description: Curated taxi trips that satisfy all quality rules.
+
+    data_tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "pickup_datetime < dropoff_datetime"
+
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "total_amount >= fare_amount"
+
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "total_amount >= tip_amount"
+
+    columns:
+      - name: passenger_count
+        data_type: int64
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: trip_distance
+        data_type: numeric
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: fare_amount
+        data_type: numeric
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: tip_amount
+        data_type: numeric
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: ">= 0"
+
+      - name: total_amount
+        data_type: numeric
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+      - name: trip_duration_minutes
+        data_type: int64
+        data_tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              arguments:
+                expression: "> 0"
+
+  - name: int_taxi_quarantine
+    description: Taxi trips that violate one or more quality rules.
+
+    columns:
+      - name: issue_description
+        data_type: string
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  [
+                    'Pickup after dropoff',
+                    'Non-positive trip duration',
+                    'Non-positive trip distance',
+                    'Negative total amount',
+                    'Invalid passenger count',
+                    'Negative fare amount'
+                  ]

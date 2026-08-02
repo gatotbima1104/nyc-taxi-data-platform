@@ -1,19 +1,8 @@
 from datetime import timedelta
 from typing import TypedDict
 
-from constants.constant import (
-    BQ_DATASET,
-    BQ_TABLE,
-    BUCKET_NAME,
-    PROJECT_ID,
-    REGION,
-    SUBSCRIPTION_ID,
-    TOPIC_ID,
-    
-    BQ_DATASET_STAGING,
-    BQ_DATASET_INTERMEDIATE,
-    BQ_DATASET_MART
-)
+from constants.constant import BUCKET_NAME
+
 
 class GCSSource(TypedDict):
     uris = list[str]

@@ -3,12 +3,10 @@ from datetime import datetime, timezone
 from airflow import DAG
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
+from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.empty import EmptyOperator
 from constants.constant import (
-    BQ_DATASET_INTERMEDIATE,
-    BQ_DATASET_MART,
     BQ_DATASET_RAW,
-    BQ_DATASET_STAGING,
     BUCKET_NAME,
     PROJECT_ID,
 )
@@ -89,13 +87,47 @@ with DAG(
             gcp_conn_id=GCP_CONN_ID,
         )
 
+    # Transformation
+    install_dbt_packages = BashOperator(
+        task_id="install_dbt_packages",
+        bash_command="dbt deps",
+        cwd="/opt/airflow/project/dbt_gcp"
+    )
+    
+    load_staging_to_bq = BashOperator(
+        task_id="load_raw_to_staging",
+        bash_command="dbt build -s staging",
+        cwd="/opt/airflow/project/dbt_gcp"
+    )
+    
+    transform_to_intermediate = BashOperator(
+        task_id="transform_to_intermediate",
+        bash_command="dbt build -s intermediate",
+        cwd="/opt/airflow/project/dbt_gcp"
+    )
+    
+    build_marts = BashOperator(
+        task_id="build_marts",
+        bash_command="dbt build -s marts",
+        cwd="/opt/airflow/project/dbt_gcp"
+    )
+
     finish = EmptyOperator(task_id="finish")
     
     # Dag Flow
-    start >> checked_parquet_files
-    checked_parquet_files >> load_trips_to_bq_raw
+    start \
+        >> checked_parquet_files \
+            >> load_trips_to_bq_raw
     
-    start >> check_zone_lookup_exist
-    check_zone_lookup_exist >> load_zone_to_bq_raw
+    start \
+        >> check_zone_lookup_exist \
+            >> load_zone_to_bq_raw
     
-    [load_trips_to_bq_raw, load_zone_to_bq_raw] >> finish
+    [load_trips_to_bq_raw, load_zone_to_bq_raw] \
+        >> install_dbt_packages
+    
+    install_dbt_packages \
+        >> load_staging_to_bq \
+            >> transform_to_intermediate \
+                >> build_marts \
+                    >> finish

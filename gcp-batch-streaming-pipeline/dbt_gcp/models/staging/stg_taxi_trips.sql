@@ -20,7 +20,7 @@ select
     coalesce(cast(improvement_surcharge as numeric), 0) as improvement_surcharge,
     coalesce(cast(total_amount as numeric), 0) as total_amount,
     
-    coalesce(cast(payment_type as string), 'Unknown') as payment_type,
+    coalesce(cast(payment_type as int64), 0) as payment_type,
     coalesce(cast(trip_type as integer), 0) as trip_type,
     coalesce(cast(congestion_surcharge as numeric), 0) as congestion_surcharge,
     coalesce(cast(cbd_congestion_fee as numeric), 0) as cbd_congestion_fee,    
