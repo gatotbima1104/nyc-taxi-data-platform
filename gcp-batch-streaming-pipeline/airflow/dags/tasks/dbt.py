@@ -83,12 +83,12 @@ def build_fact_trips_partitioned():
         target="fact_taxi_trips_partitioned"
     )
     
-def build_fact_trips_non_partition():
-    """ [DAG] Build fact_trips_non_partitioned """
-    return _dbt_build(
-        task_id="fact_taxi_trips_non_partition",
-        target="fact_taxi_trips_non_partition"
-    )
+# def build_fact_trips_non_partition():
+#     """ [DAG] Build fact_trips_non_partitioned """
+#     return _dbt_build(
+#         task_id="fact_taxi_trips_non_partition",
+#         target="fact_taxi_trips_non_partition"
+#     )
 
 def build_fact_trips_partitioned_clustered():
     """ [DAG] Build fact_trips_partitioned_clustered """

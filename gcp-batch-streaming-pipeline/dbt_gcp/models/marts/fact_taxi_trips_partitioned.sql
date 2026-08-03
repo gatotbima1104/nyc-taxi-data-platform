@@ -1,6 +1,7 @@
 {{
     config(
         materialized='incremental',
+        incremental_strategy='insert_overwrite',
         partition_by={
             "field": "pickup_date",
             "data_type": "date",

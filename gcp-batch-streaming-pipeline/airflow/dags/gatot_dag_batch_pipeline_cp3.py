@@ -8,7 +8,7 @@ from tasks.bigquery import raw_taxi_trips, raw_taxi_zone
 from tasks.dbt import (
     buid_marts,
     build_dim_zone,
-    build_fact_trips_non_partition,
+    # build_fact_trips_non_partition,
     build_fact_trips_partitioned,
     build_fact_trips_partitioned_clustered,
     build_int_business,
@@ -50,7 +50,7 @@ with DAG(
     int_taxi_join = build_int_join()
     int_taxi_curated = build_int_curated()
     int_taxi_quarantine = build_int_quarantine()
-    fact_trips_non_partition = build_fact_trips_non_partition()
+    # fact_trips_non_partition = build_fact_trips_non_partition()
     fact_trips_partitioned = build_fact_trips_partitioned()
     fact_trips_partitioned_clustered = build_fact_trips_partitioned_clustered()
     dim_zone = build_dim_zone()
@@ -68,7 +68,7 @@ with DAG(
     int_taxi_join >> [int_taxi_curated, int_taxi_quarantine]
     
     int_taxi_curated >> [
-        fact_trips_non_partition,
+        # fact_trips_non_partition,
         fact_trips_partitioned,
         fact_trips_partitioned_clustered,
     ]
