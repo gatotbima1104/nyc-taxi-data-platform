@@ -4,7 +4,7 @@ from airflow import DAG
 from airflow.providers.standard.operators.empty import EmptyOperator
 from airflow.sdk import Param
 from setup import DEFAULT_ARGS
-from tasks.bigquery import raw_taxi_trips, raw_taxi_zone
+from tasks.bigquery import export_processed_taxi, raw_taxi_trips, raw_taxi_zone
 from tasks.dbt import (
     buid_marts,
     build_dim_zone,
@@ -16,6 +16,7 @@ from tasks.dbt import (
     build_int_enriched,
     build_int_join,
     build_int_quarantine,
+    build_quarantine,
     build_stg_trips,
     build_stg_zone,
     install_packages,
@@ -40,6 +41,7 @@ with DAG(
     zone_sensors = sensor_taxi_zone()
     load_raw_taxi_trips = raw_taxi_trips()
     load_raw_taxi_zone = raw_taxi_zone()
+    export_taxi = export_processed_taxi()
 
     # Transformation
     install_packages = install_packages()
@@ -55,6 +57,7 @@ with DAG(
     fact_trips_partitioned_clustered = build_fact_trips_partitioned_clustered()
     dim_zone = build_dim_zone()
     marts = buid_marts()
+    quarantine = build_quarantine()
     
     finish = EmptyOperator(task_id="finish")
     
@@ -67,6 +70,8 @@ with DAG(
                                          
     int_taxi_join >> [int_taxi_curated, int_taxi_quarantine]
     
+    int_taxi_quarantine >> quarantine
+    
     int_taxi_curated >> [
         # fact_trips_non_partition,
         fact_trips_partitioned,
@@ -75,6 +80,7 @@ with DAG(
     
     stg_taxi_zone >> dim_zone
     
+    fact_trips_partitioned >> export_taxi
     fact_trips_partitioned >> marts
     
     marts >> finish

@@ -44,3 +44,6 @@ models:
     marts:
       +schema: "{{ env_var('BQ_DATASET_MART') }}"
       +materialized: table
+    quarantine:
+      +schema: "{{ env_var('BQ_DATASET_QUARANTINE') }}"
+      +materialized: incremental

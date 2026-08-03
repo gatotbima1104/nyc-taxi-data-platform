@@ -116,3 +116,10 @@ def buid_marts():
             )
         )
     return tasks
+
+def build_quarantine():
+    """ [DAG] Build quarantine_taxi """
+    return _dbt_build(
+        task_id="quarantine_taxi",
+        target="quarantine_taxi"
+    )

@@ -1,6 +1,8 @@
 from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
 from constants.constant import (
+    BQ_DATASET_INTERMEDIATE,
     BQ_DATASET_RAW,
+    BUCKET_NAME,
     PROJECT_ID,
 )
 from setup import GCP_CONN_ID, GCS_TRIPS_SOURCES, GCS_ZONE_SOURCES
@@ -52,4 +54,39 @@ def raw_taxi_zone():
         source_format='CSV',
         skipLeadingRows=1,
         autodetect=True,
+    )
+    
+    
+def _create_upload_task(
+    *,
+    task_id: str,
+    **upload_options
+):
+    """ [DAG] Upload GCS to BiqQuery """
+    return BigQueryInsertJobOperator(
+        task_id=task_id,
+        configuration={
+            "extract": {
+                "sourceTable": {
+                    "projectId": PROJECT_ID,
+                    "datasetId": BQ_DATASET_INTERMEDIATE,
+                    "tableId": "int_taxi_curated",
+                },
+                 "destinationUris": [
+                    (
+                        f"gs://{BUCKET_NAME}/processed/"
+                        "fact_taxi_trips_{{ params.trip_year }}-{{ params.trip_month }}.parquet"
+                    )
+                ],
+                "destinationFormat": "PARQUET",
+                "compression": "SNAPPY",
+                **upload_options
+            }
+        },
+        gcp_conn_id=GCP_CONN_ID,
+    )
+
+def export_processed_taxi():
+    return _create_upload_task(
+        task_id="export_to_processed_bucket"
     )
