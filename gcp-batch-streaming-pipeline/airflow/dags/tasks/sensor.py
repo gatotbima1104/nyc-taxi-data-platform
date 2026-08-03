@@ -23,25 +23,17 @@ def _create_gcs_sensor(
 
 def sensor_taxi_trips():
     """ [DAG] Sensor taxi trips """
-    sensors = []
+    obj_name = GCS_TRIPS_SOURCES["raw"]["uri"].replace(f"gs://{BUCKET_NAME}/", "")
     
-    for uri in GCS_TRIPS_SOURCES["raw"]["Uris"]:
-        obj_name = uri.replace(f"gs://{BUCKET_NAME}/", "")
-        file_name = obj_name.split("/")[-1].replace(".parquet", "")
-        
-        sensors.append(        
-            _create_gcs_sensor(
-                task_id=f"check_{file_name}",
-                bucket=BUCKET_NAME,
-                object=obj_name,
-            )
-        )
-        
-    return sensors
+    return _create_gcs_sensor(
+        task_id="check_taxi_trips",
+        bucket=BUCKET_NAME,
+        object=obj_name
+    )
         
 def sensor_taxi_zone():
     """ [DAG] Sensor taxi zone """
-    obj_name = GCS_ZONE_SOURCES["raw"]["Uris"][0].replace(f"gs://{BUCKET_NAME}/", "")
+    obj_name = GCS_ZONE_SOURCES["raw"]["uri"].replace(f"gs://{BUCKET_NAME}/", "")
     
     return _create_gcs_sensor(
         task_id="check_taxi_zone",

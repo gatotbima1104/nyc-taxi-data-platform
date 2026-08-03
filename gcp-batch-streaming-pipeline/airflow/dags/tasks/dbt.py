@@ -11,7 +11,10 @@ def _dbt_build(
     """ [DAG] Build dbt model """
     return BashOperator(
         task_id=task_id,
-        bash_command=f"dbt build -s {target}",
+        bash_command=(
+            f'dbt build -s {target} '
+            '--vars \'{{ {"trip_year": params.trip_year, "trip_month": params.trip_month} | tojson }}\''
+        ),
         cwd=DBT_PROJECT_DIR,
         **kwargs
     )

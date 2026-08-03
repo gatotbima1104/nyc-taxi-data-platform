@@ -38,7 +38,7 @@ def raw_taxi_trips():
     """ [DAG] load raw trips """
     return _create_load_task(
         task_id="load_raw_trips",
-        source_uris=GCS_TRIPS_SOURCES["raw"]["Uris"],
+        source_uris=GCS_TRIPS_SOURCES["raw"]["uri"],
         table_name=GCS_TRIPS_SOURCES["raw"]["table_name"],
         source_format='PARQUET'
     )
@@ -47,7 +47,7 @@ def raw_taxi_zone():
     """ [DAG] Load raw zone """
     return _create_load_task(
         task_id="load_raw_zone",
-        source_uris=GCS_ZONE_SOURCES["raw"]["Uris"],
+        source_uris=GCS_ZONE_SOURCES["raw"]["uri"],
         table_name=GCS_ZONE_SOURCES["raw"]["table_name"],
         source_format='CSV',
         skipLeadingRows=1,

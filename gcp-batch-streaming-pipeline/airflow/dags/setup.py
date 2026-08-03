@@ -5,8 +5,8 @@ from constants.constant import BUCKET_NAME
 
 
 class GCSSource(TypedDict):
-    uris = list[str]
-    table_name = str
+    uri: str
+    table_name: str
 
 DEFAULT_ARGS = {
     'owner': 'muhamad_gatot',
@@ -17,19 +17,14 @@ DEFAULT_ARGS = {
 
 GCS_TRIPS_SOURCES: dict[str, GCSSource] = {
     "raw": {
-        "Uris": [
-            f"gs://{BUCKET_NAME}/raw/green_tripdata_2026-04.parquet",
-            f"gs://{BUCKET_NAME}/raw/green_tripdata_2026-05.parquet"
-        ],
+        "uri": f"gs://{BUCKET_NAME}/raw/green_tripdata_{{{{ params.trip_year }}}}-{{{{ params.trip_month }}}}.parquet",
         "table_name": "raw_green_taxi"   
     }
 }
 
 GCS_ZONE_SOURCES: dict[str, GCSSource] = {
     "raw": {
-        "Uris": [
-            f"gs://{BUCKET_NAME}/raw/taxi_zone_lookup.csv"
-        ],
+        "uri": f"gs://{BUCKET_NAME}/raw/taxi_zone_lookup.csv",
         "table_name": "raw_zone_taxi"   
     }
 }

@@ -1,6 +1,6 @@
 {{
     config(
-        materialized='table',
+        materialized='incremental',
         partition_by={
             "field": "pickup_date",
             "data_type": "date",

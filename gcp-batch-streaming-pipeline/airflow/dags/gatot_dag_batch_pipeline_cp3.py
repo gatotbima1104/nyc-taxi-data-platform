@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 
 from airflow import DAG
 from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.sdk import Param
 from setup import DEFAULT_ARGS
 from tasks.bigquery import raw_taxi_trips, raw_taxi_zone
 from tasks.dbt import (
@@ -26,7 +27,11 @@ with DAG(
     start_date=datetime(2026,1,1, tzinfo=timezone.utc),
     schedule=None,
     catchup=False,
-    default_args=DEFAULT_ARGS
+    default_args=DEFAULT_ARGS,
+    params={
+        "trip_year": Param("2026", type="string"),
+        "trip_month": Param("04", type="string"),
+    }
 ) as dag:
     
     start = EmptyOperator(task_id="start")
