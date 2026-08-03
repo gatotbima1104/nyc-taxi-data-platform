@@ -1,16 +1,25 @@
 from datetime import datetime, timezone
 
 from airflow import DAG
-from airflow.providers.google.cloud.operators.bigquery import BigQueryInsertJobOperator
-from airflow.providers.google.cloud.sensors.gcs import GCSObjectExistenceSensor
-from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.empty import EmptyOperator
-from constants.constant import (
-    BQ_DATASET_RAW,
-    BUCKET_NAME,
-    PROJECT_ID,
+from setup import DEFAULT_ARGS
+from tasks.bigquery import raw_taxi_trips, raw_taxi_zone
+from tasks.dbt import (
+    buid_marts,
+    build_dim_zone,
+    build_fact_trips_non_partition,
+    build_fact_trips_partitioned,
+    build_fact_trips_partitioned_clustered,
+    build_int_business,
+    build_int_curated,
+    build_int_enriched,
+    build_int_join,
+    build_int_quarantine,
+    build_stg_trips,
+    build_stg_zone,
+    install_packages,
 )
-from setup import DEFAULT_ARGS, GCP_CONN_ID, GCS_TRIPS_SOURCES, GCS_ZONE_SOURCES
+from tasks.sensor import sensor_taxi_trips, sensor_taxi_zone
 
 with DAG(
     dag_id="gatot_dag_batch_pipeline_cp3",
@@ -22,112 +31,45 @@ with DAG(
     
     start = EmptyOperator(task_id="start")
     
-    # CHECK EXISTANCES FILE WITH SENSOR
-    checked_parquet_files = []
-    
-    for uri in GCS_TRIPS_SOURCES["raw"]["Uris"]:
-        object_name = uri.replace(f"gs://{BUCKET_NAME}/", "")
-        file_name = object_name.split("/")[-1].replace(".parquet", "")
-        
-        sensor = GCSObjectExistenceSensor(
-            task_id=f"check_{file_name}",
-            bucket=BUCKET_NAME,
-            object=object_name,
-            google_cloud_conn_id=GCP_CONN_ID,
-            timeout=300,
-            poke_interval=30
-        )
-        
-        checked_parquet_files.append(sensor)
-        
-    check_zone_lookup_exist = GCSObjectExistenceSensor(
-        task_id="check_zone_lookup_taxi",
-        bucket=BUCKET_NAME,
-        object=GCS_ZONE_SOURCES["raw"]["Uris"][0].replace(f"gs://{BUCKET_NAME}/", ""),
-        google_cloud_conn_id=GCP_CONN_ID,
-        timeout=300,
-        poke_interval=30,
-    )
-    
-    load_trips_to_bq_raw = BigQueryInsertJobOperator(
-        task_id="load_raw_trips",
-        configuration={
-            "load": {
-                "sourceUris": GCS_TRIPS_SOURCES["raw"]["Uris"],
-                "destinationTable": {
-                    "projectId": PROJECT_ID,
-                    "datasetId": BQ_DATASET_RAW,
-                    "tableId": GCS_TRIPS_SOURCES["raw"]["table_name"]
-                },
-                "sourceFormat": "PARQUET",
-                "writeDisposition": "WRITE_TRUNCATE",
-                "createDisposition": "CREATE_IF_NEEDED",
-            }
-        },
-        gcp_conn_id=GCP_CONN_ID,
-    )
-    
-    load_zone_to_bq_raw = BigQueryInsertJobOperator(
-            task_id="load_raw_zone",
-            configuration={
-                "load": {
-                    "sourceUris": GCS_ZONE_SOURCES["raw"]["Uris"],
-                    "destinationTable": {
-                        "projectId": PROJECT_ID,
-                        "datasetId": BQ_DATASET_RAW,
-                        "tableId": GCS_ZONE_SOURCES["raw"]["table_name"]
-                    },
-                    "sourceFormat": "CSV",
-                    "skipLeadingRows": 1,
-                    "autodetect": True,
-                    "writeDisposition": "WRITE_TRUNCATE",
-                    "createDisposition": "CREATE_IF_NEEDED",
-                }
-            },
-            gcp_conn_id=GCP_CONN_ID,
-        )
+    trip_sensors = sensor_taxi_trips()
+    zone_sensors = sensor_taxi_zone()
+    load_raw_taxi_trips = raw_taxi_trips()
+    load_raw_taxi_zone = raw_taxi_zone()
 
     # Transformation
-    install_dbt_packages = BashOperator(
-        task_id="install_dbt_packages",
-        bash_command="dbt deps",
-        cwd="/opt/airflow/project/dbt_gcp"
-    )
+    install_packages = install_packages()
+    stg_taxi_trips = build_stg_trips()
+    stg_taxi_zone = build_stg_zone()
+    int_taxi_enriched = build_int_enriched()
+    int_taxi_business = build_int_business()
+    int_taxi_join = build_int_join()
+    int_taxi_curated = build_int_curated()
+    int_taxi_quarantine = build_int_quarantine()
+    fact_trips_non_partition = build_fact_trips_non_partition()
+    fact_trips_partitioned = build_fact_trips_partitioned()
+    fact_trips_partitioned_clustered = build_fact_trips_partitioned_clustered()
+    dim_zone = build_dim_zone()
+    marts = buid_marts()
     
-    load_staging_to_bq = BashOperator(
-        task_id="load_raw_to_staging",
-        bash_command="dbt build -s staging",
-        cwd="/opt/airflow/project/dbt_gcp"
-    )
-    
-    transform_to_intermediate = BashOperator(
-        task_id="transform_to_intermediate",
-        bash_command="dbt build -s intermediate",
-        cwd="/opt/airflow/project/dbt_gcp"
-    )
-    
-    build_marts = BashOperator(
-        task_id="build_marts",
-        bash_command="dbt build -s marts",
-        cwd="/opt/airflow/project/dbt_gcp"
-    )
-
     finish = EmptyOperator(task_id="finish")
     
     # Dag Flow
-    start \
-        >> checked_parquet_files \
-            >> load_trips_to_bq_raw
+    start >> trip_sensors >> load_raw_taxi_trips    
+    start >> zone_sensors >> load_raw_taxi_zone
     
-    start \
-        >> check_zone_lookup_exist \
-            >> load_zone_to_bq_raw
+    [load_raw_taxi_trips, load_raw_taxi_zone] >> install_packages
+    install_packages >> [stg_taxi_trips, stg_taxi_zone] >> int_taxi_enriched >> int_taxi_business >> int_taxi_join 
+                                         
+    int_taxi_join >> [int_taxi_curated, int_taxi_quarantine]
     
-    [load_trips_to_bq_raw, load_zone_to_bq_raw] \
-        >> install_dbt_packages
+    int_taxi_curated >> [
+        fact_trips_non_partition,
+        fact_trips_partitioned,
+        fact_trips_partitioned_clustered,
+    ]
     
-    install_dbt_packages \
-        >> load_staging_to_bq \
-            >> transform_to_intermediate \
-                >> build_marts \
-                    >> finish
+    stg_taxi_zone >> dim_zone
+    
+    fact_trips_partitioned >> marts
+    
+    marts >> finish
