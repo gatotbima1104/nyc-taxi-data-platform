@@ -1,4 +1,6 @@
 from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.sdk import TaskGroup
 from setup import DBT_PROJECT_DIR, MART_TABLES_ANALYSIS
 
 
@@ -104,18 +106,20 @@ def build_dim_zone():
         target="dim_taxi_zone"
     )
     
-def buid_marts():
-    """ [DAG] Build marts """
-    tasks = []
-    
-    for mart in MART_TABLES_ANALYSIS:
-        tasks.append (
-            _dbt_build(
+def build_marts():
+    with TaskGroup(
+        group_id="marts"
+    ) as group:
+
+        completed = EmptyOperator(task_id="completed")
+
+        for mart in MART_TABLES_ANALYSIS:
+            task = _dbt_build(
                 task_id=f"build_{mart}",
-                target=mart
+                target=mart,
             )
-        )
-    return tasks
+            task >> completed
+    return group
 
 def build_quarantine():
     """ [DAG] Build quarantine_taxi """
