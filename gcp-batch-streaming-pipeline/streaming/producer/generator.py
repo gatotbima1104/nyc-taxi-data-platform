@@ -2,6 +2,7 @@ import random
 import uuid
 from datetime import UTC, datetime, timedelta
 
+from streaming.config import INVALID_EVENT_RATE, INVALID_SCENARIOS
 from streaming.producer.stats import BatchStatistics
 
 
@@ -71,9 +72,55 @@ class TaxiEventGenerator:
         dropoff = pickup + timedelta(minutes=duration)
         return pickup, dropoff
 
-    def generate(self):
-        now = datetime.now(UTC)
+    # GENERATE INVALID EVENTS
+    def _should_generate_invalid(self):
+        return random.random() < INVALID_EVENT_RATE
+    
+    def __invalid_trip_distance(self, event: dict) -> dict:
+        event["trip_distance"] = 0.0
+        return event
+    
+    def __invalid_pickup_dropoff(self, event: dict) -> dict:
+        pickup = datetime.fromisoformat(
+            event["lpep_pickup_datetime"]
+        )
+        event["lpep_dropoff_datetime"] = pickup.isoformat()
+        return event
+    
+    def __invalid_fare_amount(self, event: dict) -> dict:
+        event["fare_amount"] = -5.0
+        return event
+    
+    def __invalid_total_amount(self, event: dict) -> dict:
+        event["total_amount"] = event["fare_amount"] - 1
+        return event
+    
+    def _inject_invalid_event(self, event: dict) -> dict:
+        scenario = random.choices(
+            population=list(INVALID_SCENARIOS.keys()),
+            weights=list(INVALID_SCENARIOS.values()),
+            k=1,
+        )[0]
 
+        match scenario:
+            case "trip_distance":
+                return self.__invalid_trip_distance(event)
+
+            case "pickup_dropoff":
+                return self.__invalid_pickup_dropoff(event)
+
+            case "fare_amount":
+                return self.__invalid_fare_amount(event)
+
+            case "total_amount":
+                return self.__invalid_total_amount(event)
+
+            case _:
+                return event
+    
+    # GENERATE VALID EVENTS
+    def _generate_valid_event(self):
+        now = datetime.now(UTC)
         pickup_dt, dropoff_dt = self._generate_trip_time()
         distance = self._sample_numeric(self.stats.trip_distance)
         fare = self._calculate_fare(distance)
@@ -87,8 +134,6 @@ class TaxiEventGenerator:
             dropoff_zone = self._sample(
                 self.stats.dropoff_zone
             )
-
-        
 
         extra = random.choice([0.0, 1.0])
         mta_tax = 0.50
@@ -107,23 +152,31 @@ class TaxiEventGenerator:
         cbd_fee = random.choice([0.0, 0.75])
         improvement = 0.30
 
-        total = round(fare + extra + mta_tax + tip + toll + improvement + congestion + cbd_fee, 2)
+        total = round(
+            fare
+            + extra
+            + mta_tax
+            + tip
+            + toll
+            + improvement
+            + congestion
+            + cbd_fee,
+            2
+        )
 
         return {
             "event_id": str(uuid.uuid4()),
             "event_time": pickup_dt.isoformat(),
             "publish_time": now.isoformat(),
-
             "VendorID": int(vendor),
             "lpep_pickup_datetime": pickup_dt.isoformat(),
             "lpep_dropoff_datetime": dropoff_dt.isoformat(),
-            
             "store_and_fwd_flag": random.choices(
                 ["N", "Y"],
                 weights=[98, 2],
                 k=1,
             )[0],
-            
+
             "RatecodeID": random.choices(
                 [1, 2, 3],
                 weights=[95, 4, 1],
@@ -147,3 +200,11 @@ class TaxiEventGenerator:
             "congestion_surcharge": congestion,
             "cbd_congestion_fee": cbd_fee,
         }
+
+    def generate(self):
+        event = self._generate_valid_event()
+
+        if self._should_generate_invalid():
+            event = self._inject_invalid_event(event)
+
+        return event

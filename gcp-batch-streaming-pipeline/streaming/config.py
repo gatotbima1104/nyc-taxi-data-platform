@@ -8,6 +8,7 @@ PARQUET_FILE = RAW_DATA_DIR / "green_tripdata_2026-04.parquet"
 TAXI_ZONE_LOOKUP = RAW_DATA_DIR / "taxi_zone_lookup.csv"
 EVENTS_PER_INTERVAL = 1
 PUBLISH_INTERVAL_SECONDS = 1
+INVALID_EVENT_RATE = 0.05
 
 PROJECT_ID = os.getenv("PROJECT_ID") or "jcdeah-009"
 REGION = os.getenv("REGION") or "asia-southeast2"
@@ -15,6 +16,10 @@ TOPIC_ID = os.getenv("TOPIC_ID") or "cp3-gatot-topic"
 TEMP_BUCKET_NAME = os.getenv("TEMP_BUCKET_NAME") or "cp3-gatot-streaming-temp"
 SUBSCRIPTION_ID = os.getenv("SUBSCRIPTION_ID") or "cp3-gatot-sub"
 SUBSCRIPTION_PATH = f"projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_ID}"
+
+BQ_DATASET_STREAMING = os.getenv("BQ_DATASET_STREAMING") or "cp3_gatot_dataset_streaming"
+BG_TABLE_STREAMING_CURATED = os.getenv("BG_TABLE_STREAMING_CURATED") or "trips_curated"
+BG_TABLE_STREAMING_QUARANTINE = os.getenv("BG_TABLE_STREAMING_QUARANTINE") or "trips_quarantine"
 
 REQUIRED_FIELDS = [
     "event_id",
@@ -38,4 +43,11 @@ PAYMENT_TYPE = {
 STORE_AND_FWD_FLAG = {
     "Y": "Store and Forward",
     "N": "Normal"
+}
+
+INVALID_SCENARIOS = {
+    "trip_distance": 40,
+    "pickup_dropoff": 30,
+    "fare_amount": 15,
+    "total_amount": 15,
 }

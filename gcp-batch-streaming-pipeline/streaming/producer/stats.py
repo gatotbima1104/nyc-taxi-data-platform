@@ -35,9 +35,20 @@ class BatchStatistics:
 
     @staticmethod
     def _numeric_stats(series: pd.Series) -> dict:
-        """ Calculate descriptive statistics for numeric columns """
-
         series = series.dropna()
+
+        q1 = series.quantile(0.25)
+        q3 = series.quantile(0.75)
+
+        iqr = q3 - q1
+
+        lower = max(0, q1 - 1.5 * iqr)
+        upper = q3 + 1.5 * iqr
+
+        series = series[
+            (series >= lower)
+            & (series <= upper)
+        ]
 
         return {
             "mean": float(series.mean()),

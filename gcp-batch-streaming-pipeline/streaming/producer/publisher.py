@@ -9,6 +9,7 @@ from streaming.producer import BatchStatistics, TaxiEventGenerator
 publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(PROJECT_ID, TOPIC_ID)
 stats = BatchStatistics(PARQUET_FILE).load()
+print(stats.trip_distance)
 generator = TaxiEventGenerator(stats)
 
 
@@ -67,7 +68,7 @@ if __name__ == "__main__":
 
     # Example:
     # 1 event every 5 seconds
-    publish(max_events=2, dry_run=False)
+    publish(max_events=10, dry_run=False)
 
     # Publish forever
     # publish(dry_run=False)

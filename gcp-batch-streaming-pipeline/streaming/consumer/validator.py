@@ -1,41 +1,31 @@
-from datetime import datetime
-
-from streaming.config import REQUIRED_FIELDS
+from streaming.consumer.model import TaxiTrip
 
 
 class EventValidator:
-    def validate(self, event: dict):
-        errors = []
-
-        for field in REQUIRED_FIELDS:
-            if event.get(field) in (None, ""):
-                errors.append(f"{field} is required")
-        try:
-            pickup = datetime.fromisoformat(event["lpep_pickup_datetime"])
-            dropoff = datetime.fromisoformat(event["lpep_dropoff_datetime"])
+    def validate(self, trip: TaxiTrip):
+        issue = None
+        
+        if trip.pickup_datetime >= trip.dropoff_datetime:
+            issue = "Pickup after dropoff"
             
-            if pickup >= dropoff:
-                errors.append("pickup must be before dropoff")
+        elif trip.trip_duration_minutes <= 0:
+            issue = "Non-positive trip duration"
+            
+        elif trip.trip_distance <= 0:
+            issue = "Non-positive trip distance"
 
-        except Exception:
-            errors.append("invalid datetime")
+        elif trip.fare_amount < 0:
+            issue = "Negative fare amount"
 
-        if event["trip_distance"] <= 0:
-            errors.append("trip_distance must be > 0")
+        elif trip.total_amount < trip.fare_amount:
+            issue = "Negative total amount"
 
-        if event["fare_amount"] < 0:
-            errors.append("fare_amount must be >= 0")
-
-        if event["total_amount"] < event["fare_amount"]:
-            errors.append("total_amount invalid")
-
-        event["validation_errors"] = errors
-        event["is_valid"] = len(errors) == 0
-
-        return event
+        return {
+            "trip": trip,
+            "is_valid": issue is None,
+            "issue_description": issue
+        }
     
     @staticmethod
-    def partition(event, num_partitions):
-        if event["is_valid"]:
-            return 0
-        return 1
+    def partition(record, num_partitions):
+        return 0 if record["is_valid"] else 1
