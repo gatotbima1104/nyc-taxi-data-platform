@@ -1,0 +1,134 @@
+{
+  "type": "record",
+  "namespace": "com.gatot.streaming.taxi_trips",
+  "name": "TaxiTripEvent",
+  "doc": "Streaming event schema for NYC Green Taxi trips. This schema follows the original raw Green Taxi dataset with additional event metadata.",
+
+  "fields": [
+    {
+      "name": "event_id",
+      "type": "string",
+      "doc": "Unique identifier for the event."
+    },
+    {
+      "name": "event_time",
+      "type": "string",
+      "doc": "Business event timestamp when the taxi trip occurred."
+    },
+    {
+      "name": "publish_time",
+      "type": "string",
+      "doc": "Timestamp when the publisher created and sent the event."
+    },
+
+    {
+      "name": "VendorID",
+      "type": "int",
+      "doc": "Taxi vendor identifier."
+    },
+    {
+      "name": "lpep_pickup_datetime",
+      "type": "string",
+      "doc": "Pickup datetime."
+    },
+    {
+      "name": "lpep_dropoff_datetime",
+      "type": "string",
+      "doc": "Dropoff datetime."
+    },
+    {
+      "name": "store_and_fwd_flag",
+      "type": "string",
+      "doc": "Store-and-forward flag."
+    },
+    {
+      "name": "RatecodeID",
+      "type": "int",
+      "doc": "Rate code identifier."
+    },
+    {
+      "name": "PULocationID",
+      "type": "int",
+      "doc": "Pickup location identifier."
+    },
+    {
+      "name": "DOLocationID",
+      "type": "int",
+      "doc": "Dropoff location identifier."
+    },
+    {
+      "name": "passenger_count",
+      "type": "int",
+      "doc": "Number of passengers."
+    },
+    {
+      "name": "trip_distance",
+      "type": "double",
+      "doc": "Trip distance in miles."
+    },
+    {
+      "name": "fare_amount",
+      "type": "double",
+      "doc": "Base fare amount."
+    },
+    {
+      "name": "extra",
+      "type": "double",
+      "doc": "Extra charge."
+    },
+    {
+      "name": "mta_tax",
+      "type": "double",
+      "doc": "MTA tax."
+    },
+    {
+      "name": "tip_amount",
+      "type": "double",
+      "doc": "Tip amount."
+    },
+    {
+      "name": "tolls_amount",
+      "type": "double",
+      "doc": "Toll amount."
+    },
+    {
+      "name": "ehail_fee",
+      "type": [
+        "null",
+        "double"
+      ],
+      "default": null,
+      "doc": "E-hail fee."
+    },
+    {
+      "name": "improvement_surcharge",
+      "type": "double",
+      "doc": "Improvement surcharge."
+    },
+    {
+      "name": "total_amount",
+      "type": "double",
+      "doc": "Total amount paid."
+    },
+    {
+      "name": "payment_type",
+      "type": "int",
+      "doc": "Payment type code."
+    },
+    {
+      "name": "trip_type",
+      "type": "int",
+      "doc": "Trip type identifier."
+    },
+    {
+      "name": "congestion_surcharge",
+      "type": "double",
+      "doc": "Congestion surcharge."
+    },
+    {
+      "name": "cbd_congestion_fee",
+      "type": "double",
+      "doc": "CBD congestion fee."
+    }
+  ]
+}
