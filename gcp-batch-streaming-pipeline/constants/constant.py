@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -18,6 +17,7 @@ BQ_DATASET_STAGING = os.getenv("BQ_DATASET_STAGING") or "cp3_gatot_dataset_stagi
 BQ_DATASET_INTERMEDIATE = os.getenv("BQ_DATASET_INTERMEDIATE") or "cp3_gatot_dataset_intermediate"
 BQ_DATASET_MART = os.getenv("BQ_DATASET_MART") or "cp3_gatot_dataset_mart"
 BQ_DATASET_QUARANTINE = os.getenv("BQ_DATASET_QUARANTINE") or "cp3_gatot_dataset_quarantine"
+BQ_DATASET_STREAMING = os.getenv("BQ_DATASET_STREAMING") or "cp3_gatot_dataset_streaming"
 
-PARQUET_PATH = Path("data/raw/green_tripdata_2026-04.parquet")
-EVENTS_PER_SECOND = 1
+BG_TABLE_STREAMING_CURATED = os.getenv("BG_TABLE_STREAMING_CURATED") or "trips_curated"
+BG_TABLE_STREAMING_QUARANTINE = os.getenv("BG_TABLE_STREAMING_QUARANTINE") or "trips_quarantine"

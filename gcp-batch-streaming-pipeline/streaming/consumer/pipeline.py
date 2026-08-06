@@ -5,34 +5,34 @@ import apache_beam as beam
 from apache_beam.io.gcp.bigquery import WriteToBigQuery
 from apache_beam.io.gcp.pubsub import ReadFromPubSub
 from apache_beam.options.pipeline_options import PipelineOptions, StandardOptions
-from streaming.bq_schema import CURATED_SCHEMA, QUARANTINE_SCHEMA
-from streaming.config import (
+from constants.constant import (
     BG_TABLE_STREAMING_CURATED,
     BG_TABLE_STREAMING_QUARANTINE,
     BQ_DATASET_STREAMING,
     PROJECT_ID,
-    SUBSCRIPTION_PATH,
 )
-from streaming.consumer.log import LogEvent
+from streaming.bq_schema import CURATED_SCHEMA, QUARANTINE_SCHEMA
 from streaming.consumer.transformer import TaxiTransformer
 from streaming.consumer.validator import EventValidator
 from streaming.consumer.zone_lookup import TaxiZoneLookup
+from streaming.helper import Helper
+from streaming.setup import SUBSCRIPTION_PATH
 
 
 def decode_message(message: bytes):
     return json.loads(message.decode("utf-8"))
 
-def run():
-    options = PipelineOptions()
+def run(argv=None):
+    options = PipelineOptions(argv)
+    
     standard_opt = options.view_as(StandardOptions)
-    standard_opt.runner = "DirectRunner"
     standard_opt.streaming = True
     
     zone_lookup = TaxiZoneLookup()
     transformer = TaxiTransformer(zone_lookup)
     validator = EventValidator()
     
-    with beam.Pipeline(options=standard_opt) as pipeline:
+    with beam.Pipeline(options=options) as pipeline:
         messages = (
             pipeline
             
@@ -70,8 +70,8 @@ def run():
             | "Curated To Dict"
             >> beam.Map(lambda x: asdict(x["trip"]))
 
-            | "Print Event Curated"
-            >> beam.ParDo(LogEvent("CURATED"))
+            | "Log Curated"
+            >> beam.Map(Helper.consumer_log, status="CURATED")
         
             | "Write curated to Big Query"
             >> WriteToBigQuery(
@@ -82,6 +82,8 @@ def run():
                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
                 schema=CURATED_SCHEMA,
                 method=WriteToBigQuery.Method.STREAMING_INSERTS,
+                insert_retry_strategy="RETRY_ON_TRANSIENT_ERROR",
+                batch_size=100
             )
         )
         
@@ -96,8 +98,8 @@ def run():
                 }
             )
             
-            | "Print Event Quarantine"
-            >> beam.ParDo(LogEvent("QUARANTINE"))
+            | "Log Quarantine"
+            >> beam.Map(Helper.consumer_log, status="QUARANTINE")
         
             | "Write quarantine to Big Query"
             >> WriteToBigQuery(
@@ -108,8 +110,12 @@ def run():
                 create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
                 schema=QUARANTINE_SCHEMA,
                 method=WriteToBigQuery.Method.STREAMING_INSERTS,
+                insert_retry_strategy="RETRY_ON_TRANSIENT_ERROR",
+                batch_size=100
             )
         )
         
 if __name__ == "__main__":
-    run()
+    import sys
+    
+    run(sys.argv)

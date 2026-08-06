@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
-from streaming.config import PAYMENT_TYPE, STORE_AND_FWD_FLAG
 from streaming.consumer.model import TaxiTrip
+from streaming.setup import PAYMENT_TYPE, STORE_AND_FWD_FLAG
 
 
 class TaxiTransformer:

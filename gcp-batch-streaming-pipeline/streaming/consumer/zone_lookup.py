@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas import DataFrame
-from streaming.config import TAXI_ZONE_LOOKUP
+from streaming.setup import TAXI_ZONE_LOOKUP
 
 
 class TaxiZoneLookup:

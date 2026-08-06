@@ -1,5 +1,6 @@
-import os
 from pathlib import Path
+
+from constants.constant import PROJECT_ID, SUBSCRIPTION_ID
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BASE_DIR / "data"
@@ -10,16 +11,7 @@ EVENTS_PER_INTERVAL = 1
 PUBLISH_INTERVAL_SECONDS = 1
 INVALID_EVENT_RATE = 0.05
 
-PROJECT_ID = os.getenv("PROJECT_ID") or "jcdeah-009"
-REGION = os.getenv("REGION") or "asia-southeast2"
-TOPIC_ID = os.getenv("TOPIC_ID") or "cp3-gatot-topic"
-TEMP_BUCKET_NAME = os.getenv("TEMP_BUCKET_NAME") or "cp3-gatot-streaming-temp"
-SUBSCRIPTION_ID = os.getenv("SUBSCRIPTION_ID") or "cp3-gatot-sub"
 SUBSCRIPTION_PATH = f"projects/{PROJECT_ID}/subscriptions/{SUBSCRIPTION_ID}"
-
-BQ_DATASET_STREAMING = os.getenv("BQ_DATASET_STREAMING") or "cp3_gatot_dataset_streaming"
-BG_TABLE_STREAMING_CURATED = os.getenv("BG_TABLE_STREAMING_CURATED") or "trips_curated"
-BG_TABLE_STREAMING_QUARANTINE = os.getenv("BG_TABLE_STREAMING_QUARANTINE") or "trips_quarantine"
 
 REQUIRED_FIELDS = [
     "event_id",
