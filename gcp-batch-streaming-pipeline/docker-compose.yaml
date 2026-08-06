@@ -14,17 +14,10 @@ x-airflow-common:
     AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW__API_AUTH__JWT_SECRET:-airflow_jwt_secret}
     AIRFLOW__API_AUTH__JWT_ISSUER: ${AIRFLOW__API_AUTH__JWT_ISSUER:-airflow}
     AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
-    AIRFLOW_CONN_DAY27_METADATA_POSTGRES: postgresql://airflow:airflow@postgres:5432/airflow
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     AIRFLOW_UID: ${AIRFLOW_UID:-50000}
-    # PYTHONPATH: /opt/airflow/project
-    POSTGRES_HOST: ${DOCKER_POSTGRES_HOST}
-    POSTGRES_PORT: ${DOCKER_POSTGRES_PORT}
-    POSTGRES_DB: ${POSTGRES_DB}
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/logs:/opt/airflow/logs
@@ -42,8 +35,6 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_HOST: ${DOCKER_POSTGRES_HOST}
-      POSTGRES_PORT: ${DOCKER_POSTGRES_PORT}
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
