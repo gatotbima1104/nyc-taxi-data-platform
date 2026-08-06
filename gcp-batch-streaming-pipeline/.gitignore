@@ -19,6 +19,7 @@ dbt_project/.dbt/.user.yml
 airflow/config/
 *.json
 notes.txt
+credentials/
 
 # dbt ignores
 .user.yml
