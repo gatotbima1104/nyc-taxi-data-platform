@@ -18,6 +18,9 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
     AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+    PROJECT_ID: ${PROJECT_ID}
+    GOOGLE_CLOUD_PROJECT: ${PROJECT_ID}
+    CLOUDSDK_CORE_PROJECT: ${PROJECT_ID}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/airflow/logs:/opt/airflow/logs
@@ -197,5 +200,25 @@ services:
       _PIP_ADDITIONAL_REQUIREMENTS: ''
     user: "0:0"
 
+  dbt-docs:
+    <<: *airflow-common
+    entrypoint: bash
+    working_dir: /opt/airflow/project/dbt_gcp
+
+    command:
+      - -c
+      - |
+        dbt docs serve \
+          --host 0.0.0.0 \
+          --port 8081 \
+          --no-browser
+
+    ports:
+      - "8081:8081"
+
+    restart: unless-stopped
+    labels:
+      - dev.orbstack.domains=dbt-docs.local
+    
 volumes:
   postgres-db-volume:

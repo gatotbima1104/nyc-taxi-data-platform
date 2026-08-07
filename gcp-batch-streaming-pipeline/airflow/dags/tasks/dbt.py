@@ -1,5 +1,7 @@
+from airflow.dags.utils.dbt_doc_hash import DbtDocsHash
 from airflow.providers.standard.operators.bash import BashOperator
 from airflow.providers.standard.operators.empty import EmptyOperator
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.sdk import TaskGroup
 from setup import DBT_PROJECT_DIR, MART_TABLES_ANALYSIS
 
@@ -126,4 +128,31 @@ def build_quarantine():
     return _dbt_build(
         task_id="quarantine_taxi",
         target="quarantine_taxi"
+    )
+    
+def check_model_changes():
+    checker = DbtDocsHash(DBT_PROJECT_DIR)
+    should_generate = checker.should_generate()
+    
+    if should_generate:
+        print("dbt models changed. Generating documentation...")
+    else:
+        print("No dbt model changes detected. Skipping documentation.")
+    
+    return should_generate
+
+def update_dbt_hash():
+    checker = DbtDocsHash(DBT_PROJECT_DIR)
+    checker.update_hash()    
+    
+def trigger_dbt_docs():
+    return TriggerDagRunOperator(
+        task_id="trigger_dbt_docs",
+        trigger_dag_id="generate_dbt_docs",
+        wait_for_completion=True,
+        deferrable=True,
+        conf={
+             "trip_year": "{{ params.trip_year }}",
+             "trip_month": "{{ params.trip_month }}",
+        }
     )

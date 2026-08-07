@@ -7,10 +7,11 @@ from groups.marts import create_marts_group
 from groups.raw import create_raw_group
 from groups.staging import create_stg_group
 from setup import DEFAULT_ARGS
+from tasks.dbt import trigger_dbt_docs
 from tasks.empty import finish, start
 
 with DAG(
-    dag_id="gatot_batch_pipeline_cp3",
+    dag_id="gatot_batch_pipeline",
     start_date=datetime(2026,1,1, tzinfo=timezone.utc),
     schedule=None,
     catchup=False,
@@ -27,6 +28,7 @@ with DAG(
     int_layer = create_int_group()
     marts = create_marts_group()
     finish_dag = finish()
+    trigger_docs = trigger_dbt_docs()
     
     # Dag Flow
     start_dag \
@@ -34,4 +36,5 @@ with DAG(
         >> stg_layer \
         >> int_layer \
         >> marts \
-        >> finish_dag
+        >> finish_dag \
+        >> trigger_docs
