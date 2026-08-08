@@ -9,12 +9,12 @@ RUN apt-get update && \
 
 USER airflow
 
-COPY requirements.txt .
+COPY batch_requirements.txt .
 
 RUN python -m pip install --upgrade pip setuptools wheel && \
     pip install \
     --no-cache-dir \
-    -r requirements.txt \
+    -r batch_requirements.txt \
     --no-build-isolation
 
 ENV PYTHONPATH=/opt/airflow/project
