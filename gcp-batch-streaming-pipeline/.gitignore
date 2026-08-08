@@ -1,0 +1,34 @@
+.venv/
+venv/
+__pycache__/
+.env
+
+*.parquet
+*.csv
+
+logs/
+notes/
+
+# dbt
+dbt_project/target/
+dbt_project/logs/
+dbt_project/dbt_packages/
+
+# If using a local profile
+dbt_project/.dbt/.user.yml
+airflow/config/
+*.json
+notes.txt
+credentials/
+
+# dbt ignores
+.user.yml
+target/
+dbt_packages/
+logs/
+.env
+
+old_requirement.txt
+
+!data/raw/green_tripdata_2026-04.parquet
+!data/raw/taxi_zone_lookup.csv

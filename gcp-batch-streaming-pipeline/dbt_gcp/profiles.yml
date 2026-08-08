@@ -1,0 +1,15 @@
+dbt_gcp:
+  target: dev
+  outputs:
+    dev:
+      method: oauth
+      type: bigquery
+      
+      project: "{{ env_var('PROJECT_ID') }}"
+      dataset: "{{ env_var('BQ_DATASET_RAW') }}"
+      location: "{{ env_var('REGION') }}"
+      
+      threads: 4
+      priority: interactive
+      job_execution_timeout_seconds: 300
+      job_retries: 1
