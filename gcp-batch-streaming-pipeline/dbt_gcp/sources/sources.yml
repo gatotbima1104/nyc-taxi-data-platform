@@ -1,8 +1,8 @@
 sources:
   - name: raw
-    description: Raw data trips from jcdeah-009.cp3_gatot_dataset_raw
-    database: jcdeah-009
-    dataset: cp3_gatot_dataset_raw
+    description: Raw data trips
+    database: "{{ env_var('PROJECT_ID') }}"
+    dataset: "{{ env_var('BQ_DATASET_RAW') }}"
     tables:
       - name: raw_green_taxi
         description: Raw taxi trips.

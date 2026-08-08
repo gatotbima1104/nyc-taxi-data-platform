@@ -29,3 +29,6 @@ logs/
 .env
 
 old_requirement.txt
+
+!data/raw/green_tripdata_2026-04.parquet
+!data/raw/taxi_zone_lookup.csv

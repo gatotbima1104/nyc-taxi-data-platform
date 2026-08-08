@@ -5,9 +5,9 @@ dbt_gcp:
       method: oauth
       type: bigquery
       
-      project: "{{ env_var('PROJECT_ID', 'jcdeah-009') }}"
-      dataset: "{{ env_var('BQ_DATASET_RAW', 'cp3_gatot_dataset_raw') }}"
-      location: "{{ env_var('REGION', 'asia-southeast2') }}"
+      project: "{{ env_var('PROJECT_ID') }}"
+      dataset: "{{ env_var('BQ_DATASET_RAW') }}"
+      location: "{{ env_var('REGION') }}"
       
       threads: 4
       priority: interactive

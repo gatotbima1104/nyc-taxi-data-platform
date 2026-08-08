@@ -9,7 +9,7 @@ class GCSSource(TypedDict):
     table_name: str
 
 DEFAULT_ARGS = {
-    'owner': 'muhamad_gatot',
+    'owner': '',
     'retries': 2,
     'retry_delay': timedelta(minutes=5),
     'email_on_failure': False
